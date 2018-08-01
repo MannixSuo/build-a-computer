@@ -15,21 +15,32 @@
 M=0     //i=0
 @R2
 M=0
+@R0
+D=M
+@END
+D;JEQ // if R0 == 0 goto end
+@R1
+D=M
+@END
+D;JEQ // if R1 == 0 goto end
+
 (START)
 @i
 D=M
-M=M+1  // i++
 @R1
-D=M  
-@R2
-M=D+M  //R2+=R1
+D=D-M 
+@END
+D;JGE // if i-R1<=0 goto end
 
 @i
-D=M
-@R1
-D=D-M // if i-R1<0 goto START
+M=M+1  // i++
+
+@R0
+D=M  
+@R2
+M=D+M  //R2+=R0
 @START
-D;JLT
+0;JEQ
 (END)
 @END
 0;JEQ
