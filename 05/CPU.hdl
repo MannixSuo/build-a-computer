@@ -83,5 +83,4 @@ CHIP CPU {
 	And(a=jumpCondition,b=instruction[15],out=isJump);
 	// pc默认执行下一条命令
 	PC(in=aRegOut,load=isJump,inc=true,reset=reset,out[0..14]=pc);
-	
 }
