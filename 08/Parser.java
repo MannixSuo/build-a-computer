@@ -1,6 +1,5 @@
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,7 +18,6 @@ public class Parser {
     private static String[] arith = {"add", "sub", "neg", "eq", "gt", "lt", "and", "or", "not"};
     private static List<String> arithmeticCommands = new ArrayList<>(Arrays.asList(arith));
     private BufferedReader bufferedReader;
-    private FileReader fileReader;
     private String currentCommand;
 
     public Parser() {
@@ -75,6 +73,8 @@ public class Parser {
                 return Command.C_PUSH;
             }else if (commandType.equals("function")){
                 return Command.C_FUNCTION;
+            }else if ("call".equals(commandType)) {
+            	return Command.C_CALL;
             }
         }
         return null;
