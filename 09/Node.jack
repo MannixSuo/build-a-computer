@@ -1,0 +1,52 @@
+class Node{
+	field int xPosition,yPosition;
+	field Node nextNode;
+
+	constructor Node new(int x,int y,Node next){
+	  let xPosition = x;
+	  let yPosition = y;
+	  let nextNode = next;
+	  return this;
+	}
+
+	method Node next(){
+		return nextNode;
+	}
+
+	method void draw(){
+	  do Screen.setColor(true);
+      do Screen.drawLine(510,0,510,210);
+      do Screen.drawLine(0,210,510,210);
+      do Screen.drawRectangle(xPosition, yPosition, xPosition + 10, yPosition + 10);
+      return;
+	}
+
+	method void setNextNode (Node node){
+      let nextNode = node;
+      return;
+	}
+
+	method boolean hasNext(){
+		if(nextNode = null){return false;}
+		return true;
+	}
+
+	method int getXPosition(){
+		return xPosition;
+	}
+
+	method int getYPosition(){
+		return yPosition;
+	}
+
+	method void dispose() {
+      	do Memory.deAlloc(this);
+      	return;
+   }
+   method void disposeNext(){
+   	if(~(nextNode = null)){
+   	  do nextNode.dispose();
+   	}
+   	return;
+   }
+}

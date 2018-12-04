@@ -1,0 +1,121 @@
+class Snake{
+	field int length,speed;
+	field Node head,tail;
+
+	constructor Snake new(){
+		let length = 1;
+		let speed = 100;
+		let head = Node.new(0,0,null);
+		let tail = head;
+		return this;
+	}
+
+	method void dispose() {
+      do Memory.deAlloc(this);
+      return;
+   }
+
+   method void eat(Node food){
+   		var int hx ,hy,fx,fy;
+   		let hx = head.getXPosition();
+   		let hy = head.getYPosition();
+   		let fx = food.getXPosition();
+   		let fy = food.getYPosition();
+   		if(hx=fx){
+   			if(hy=fy){
+   			do tail.setNextNode(food);
+   			let tail = food;
+   		    let length = length + 1;
+   			}
+   		}
+   		return;
+   }
+
+   method void move(int direction,Node food){
+   	if(direction=1){do moveUp();}
+   	if(direction=2){do moveDown();}
+   	if(direction=3){do moveLeft();}
+   	if(direction=4){do moveRight();}
+   	do food.draw();
+   	do eat(food);
+   	do Sys.wait(speed);
+   	do cut(length);
+   	do draw();
+   	return;
+   }
+
+   method void cut(int length){
+   		var int temp ;
+   		var Node lastNode ;
+   		let lastNode = head;
+   		let temp = length-1;
+   		while(temp>0){
+			let lastNode = lastNode.next();
+			let temp =  temp - 1;
+   		}
+   		do lastNode.disposeNext();
+   		do lastNode.setNextNode(null);
+   		return;
+   }
+
+   method void moveUp(){
+   		var Node newHead;
+   		var int newX,newY;
+   		let newX = head.getXPosition();
+   		let newY = head.getYPosition() - 10;
+   		if(newY<0){let newY = 200;}
+   		let newHead = Node.new(newX,newY,head);
+   		let head = newHead;
+   		return;
+   }
+
+   method void moveDown(){
+		var Node newHead;
+   		var int newX,newY;
+   		let newX = head.getXPosition();
+   		let newY = head.getYPosition() + 10;
+   		if(newY>200){ let newY = 0;}
+   		let newHead = Node.new(newX,newY,head);
+   		let head = newHead;
+   		return;
+   }
+
+   method void moveLeft(){
+   		var Node newHead;
+   		var int newX,newY;
+   		let newX = head.getXPosition() - 10;
+   		let newY = head.getYPosition();
+   		if(newX<0){let newX = 500;}
+   		let newHead = Node.new(newX,newY,head);
+   		let head = newHead;
+   		return;
+   }
+
+   method void moveRight(){
+   	    var Node newHead;
+   		var int newX,newY;
+   		let newX = head.getXPosition() + 10;
+   		let newY = head.getYPosition();
+   		if(newX>500){ let newX = 0;}
+   		let newHead = Node.new(newX,newY,head);
+   		let head = newHead;
+   		return;
+   }
+
+   method void draw(){
+   		var boolean hasNext;
+   		var Node currentNode;
+   		var int templen;
+   		let templen = length;
+        do Screen.clearScreen();
+        do head.draw();
+   		let currentNode = head;
+   		let hasNext = head.hasNext();
+   		while(hasNext){
+   		    let hasNext = currentNode.hasNext();
+   		    do currentNode.draw();
+   			let currentNode = currentNode.next();
+   		}
+   		return;
+   }
+}
