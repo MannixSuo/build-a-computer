@@ -1,16 +1,20 @@
 class Node{
 	field int xPosition,yPosition;
-	field Node nextNode;
-
-	constructor Node new(int x,int y,Node next){
+	field Node nextNode,previousNode;
+	constructor Node new(int x,int y,Node next,Node pre){
 	  let xPosition = x;
 	  let yPosition = y;
 	  let nextNode = next;
+	  let previousNode = pre;
 	  return this;
 	}
 
 	method Node next(){
 		return nextNode;
+	}
+
+	method Node pre(){
+		return previousNode;
 	}
 
 	method void draw(){
@@ -21,9 +25,19 @@ class Node{
       return;
 	}
 
-	method void setNextNode (Node node){
+	method void setNextNode(Node node){
       let nextNode = node;
       return;
+	}
+
+	method void setPreviousNode(Node node){
+		let previousNode = node;
+		return;
+	}
+
+	method boolean hasPrevious(){
+		if(previousNode = null){return false;}
+		return true;
 	}
 
 	method boolean hasNext(){
@@ -39,10 +53,21 @@ class Node{
 		return yPosition;
 	}
 
+	method void setX(int x){
+		let xPosition = x;
+		return;
+	}
+
+	method void setY(int y){
+		let yPosition = y;
+		return;
+	}
+
 	method void dispose() {
       	do Memory.deAlloc(this);
       	return;
    }
+
    method void disposeNext(){
    	if(~(nextNode = null)){
    	  do nextNode.dispose();

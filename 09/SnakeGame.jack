@@ -13,29 +13,31 @@ class SnakeGame{
       var Node food;
       let exit = false;
       let direction = 0;
-      let food = Node.new(10,20,null);
+      let food = Node.new(10,20,null,null);
       while (~exit) {
          // waits for a key to be pressed and snake will move towards
          while (key = 0) {
             let key = Keyboard.keyPressed();
             if (key = 81)  { let exit = true; return; }     // q key
-            if (key = 131) { let direction = 1; }   // up arrow
-            if (key = 133) { let direction = 2; }   // down arrow
-            if (key = 130) { let direction = 3; }   // left arrow
-            if (key = 132) { let direction = 4; }   // right arrow
+            if (key = 131) { if(~(direction=2)){let direction = 1; } }   // up arrow
+            if (key = 133) { if(~(direction=1)){let direction = 2; } }   // down arrow
+            if (key = 130) { if(~(direction=4)){let direction = 3; } }   // left arrow
+            if (key = 132) { if(~(direction=3)){let direction = 4; } }   // right arrow
             do snake.move(direction,food);
+            if(~snake.isAlive()){let exit = true; return;}
             let key = 0;
  		}
-         // waits for the key to be released
-         //while (~(key = 0)) {
-          //  let key = Keyboard.keyPressed();
-            //do snake.move(direction,food);
-         //}
      } // while
      return;
 	}
+
 	method void dispose(){
 		do Memory.deAlloc(this);
         return;
+	}
+
+	method Node generateNewFood(Snake snake){
+		var Node head;
+		var int x,y;
 	}
 }

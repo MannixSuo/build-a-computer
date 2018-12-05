@@ -1,12 +1,14 @@
 class Snake{
 	field int length,speed;
 	field Node head,tail;
+	field boolean alive;
 
 	constructor Snake new(){
 		let length = 1;
 		let speed = 100;
-		let head = Node.new(0,0,null);
+		let head = Node.new(0,0,null,null);
 		let tail = head;
+		let alive = true;
 		return this;
 	}
 
@@ -17,15 +19,18 @@ class Snake{
 
    method void eat(Node food){
    		var int hx ,hy,fx,fy;
+   		var Node node;
    		let hx = head.getXPosition();
    		let hy = head.getYPosition();
    		let fx = food.getXPosition();
    		let fy = food.getYPosition();
    		if(hx=fx){
    			if(hy=fy){
-   			do tail.setNextNode(food);
-   			let tail = food;
-   		    let length = length + 1;
+   			  let node = Node.new(fx,fy,null,null);
+   			  do tail.setNextNode(node);
+   			  do node.setPreviousNode(tail);
+   			  let tail = node;
+   		      let length = length + 1;
    			}
    		}
    		return;
@@ -37,11 +42,15 @@ class Snake{
    	if(direction=3){do moveLeft();}
    	if(direction=4){do moveRight();}
    	do food.draw();
+   	do checkEatSelf();
    	do eat(food);
    	do Sys.wait(speed);
-   	do cut(length);
    	do draw();
    	return;
+   }
+
+   method boolean isAlive(){
+   		return alive;
    }
 
    method void cut(int length){
@@ -59,46 +68,50 @@ class Snake{
    }
 
    method void moveUp(){
-   		var Node newHead;
+   		var Node new;
    		var int newX,newY;
    		let newX = head.getXPosition();
    		let newY = head.getYPosition() - 10;
    		if(newY<0){let newY = 200;}
-   		let newHead = Node.new(newX,newY,head);
-   		let head = newHead;
+   		let new = Node.new(newX,newY,null,null);
+   		do addHead(new);
+   		do removeTail();
    		return;
    }
 
    method void moveDown(){
-		var Node newHead;
+		var Node new;
    		var int newX,newY;
    		let newX = head.getXPosition();
    		let newY = head.getYPosition() + 10;
    		if(newY>200){ let newY = 0;}
-   		let newHead = Node.new(newX,newY,head);
-   		let head = newHead;
+   		let new = Node.new(newX,newY,null,null);
+   		do addHead(new);
+   		do removeTail();
    		return;
    }
 
    method void moveLeft(){
-   		var Node newHead;
+   		var Node new;
    		var int newX,newY;
    		let newX = head.getXPosition() - 10;
    		let newY = head.getYPosition();
    		if(newX<0){let newX = 500;}
-   		let newHead = Node.new(newX,newY,head);
-   		let head = newHead;
+   		let new = Node.new(newX,newY,null,null);
+   		do addHead(new);
+   		do removeTail();
    		return;
    }
 
    method void moveRight(){
-   	    var Node newHead;
+   	    var Node new;
    		var int newX,newY;
    		let newX = head.getXPosition() + 10;
    		let newY = head.getYPosition();
    		if(newX>500){ let newX = 0;}
-   		let newHead = Node.new(newX,newY,head);
-   		let head = newHead;
+   		let new = Node.new(newX,newY,null,null);
+   		do addHead(new);
+   		do removeTail();
    		return;
    }
 
@@ -115,6 +128,55 @@ class Snake{
    		    let hasNext = currentNode.hasNext();
    		    do currentNode.draw();
    			let currentNode = currentNode.next();
+   		}
+   		do Output.moveCursor(21,0);
+   		do Output.printString("SCORE: ");
+   		do Output.printInt((length-1) * 10);
+   		return;
+   }
+
+   method void removeTail(){
+   		var Node temp;
+   		let temp = tail;
+   		let tail = temp.pre();
+   		do tail.setNextNode(null);
+
+   		do temp.setPreviousNode(null);
+   		do temp.setNextNode(null);
+   		do temp.dispose();
+   		return;
+   }
+
+   method void addHead(Node new){
+   		do head.setPreviousNode(new);
+   		do new.setNextNode(head);
+   		let head = new;
+   		return;
+   }
+
+   
+   method Node getTail(){
+   		return tail;
+   }
+   method Node getHead(){
+   		return head;
+   }
+   method void checkEatSelf(){
+   		var Node currentNode;
+   		var int cx,cy,hx,hy;
+   		let hx = head.getXPosition();
+   		let hy = head.getYPosition();
+   		if(length<2){return;}
+   		let currentNode = head.next();
+   		while(currentNode.hasNext()){
+   			let currentNode = currentNode.next();
+   			let cx = currentNode.getXPosition();
+   			let cy = currentNode.getYPosition();
+   			if(cx = hx){ 
+   				if(cy = hy){
+   					let alive = false;
+   				}
+   			}
    		}
    		return;
    }
