@@ -5,11 +5,11 @@
 
 /** Expressionless version of projects/10/Square/Main.jack. */
 
-class Main {
+ class  Main  {
     static boolean test;    // Added for testing -- there is no static keyword
                             // in the Square files.
 
-    function void main() {
+      function void   main()   {
         var SquareGame game;
         let game = game;
         do game.run();
