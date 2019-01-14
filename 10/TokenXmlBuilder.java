@@ -18,6 +18,26 @@ public class TokenXmlBuilder {
         stringBuilder.append(String.format(" </%s>\n",node));
     }
 
+    public void addKeyword(Keyword keyword){
+        addNodeAndAttribute(TokenType.KEYWORD.getValue(), keyword.value);
+    }
+
+    public void addIdentifier(String identifier){
+        addNodeAndAttribute(TokenType.IDENTIFIER.getValue(),identifier);
+    }
+
+    public void addSymbol(char symbol){
+        addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(symbol));
+    }
+
+    public void  addIntconstant(String i){
+        addNodeAndAttribute(TokenType.INT_CONST.getValue(), String.valueOf(i));
+    }
+
+    public void addStringconstant(String s){
+        addNodeAndAttribute(TokenType.STRING_CONST.getValue(), s);
+    }
+
     private String startNode(String value){
         return String.format("%s<%s>\n",tabNumber(),value);
     }

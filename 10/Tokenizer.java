@@ -1,8 +1,11 @@
 import java.io.*;
 
 public class Tokenizer {
+
     private BufferedReader bufferedReader;
     private String currentToken;
+    private boolean moveBack = false;
+
     public Tokenizer(File file) {
         try {
             this.bufferedReader = new BufferedReader(new FileReader(file));
@@ -12,7 +15,20 @@ public class Tokenizer {
     }
 
     /**
-     * while this file contain more tokens
+     * read next character
+     * @return -1 for end
+     * @throws IOException  if reader is null
+     */
+    private int read() throws IOException {
+        if (bufferedReader!=null){
+            return bufferedReader.read();
+        } else{
+            throw new IOException();
+        }
+    }
+
+    /**
+     * whether this file contain more tokens
      * after this method the reader's current
      * index is the white space before next tokens
      *
@@ -34,6 +50,10 @@ private int line = 1;
         // if white space stop read
         // if special symbol stop read
         //
+        if (moveBack){
+            moveBack = false;
+            return;
+        }
         StringBuilder stringBuilder = new StringBuilder();
         boolean singleSymbol = true;
         boolean start = true;
@@ -106,7 +126,9 @@ private int line = 1;
             currentToken = stringBuilder.toString();
         }
     }
-
+    public void moveBack(){
+        this.moveBack = true;
+    }
 
     private boolean isSpecialSymbol(int value) {
         // 0-9

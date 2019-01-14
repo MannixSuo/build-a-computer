@@ -6,7 +6,7 @@ import java.io.IOException;
 public class CompilationEngine {
     private Tokenizer tokenizer;
     private File outputFile;
-    TokenXmlBuilder tokenXmlBuilder = new TokenXmlBuilder();
+    private TokenXmlBuilder tokenXmlBuilder = new TokenXmlBuilder();
 
     public CompilationEngine(Tokenizer tokenizer, File outputFile) {
         this.tokenizer = tokenizer;
@@ -40,7 +40,7 @@ public class CompilationEngine {
         char symbol = tokenizer.symbol();
         while (symbol != Symbol.CLOSE_BRACE.getValue()) {
             Keyword keyword = tokenizer.keyword();
-            if (keyword==null) break;
+            if (keyword==null){ break;}
             if (Keyword.LET.value.equals(keyword.value)) {
                 compileLet();
                 tokenizer.advance();
@@ -67,13 +67,13 @@ public class CompilationEngine {
         // 'class' className '{' classVarDec* subroutineDec* '}'
         tokenXmlBuilder.setStartNode(Keyword.CLASS.value);
         // 'class'
-        tokenXmlBuilder.addNodeAndAttribute(TokenType.KEYWORD.getValue(), Keyword.CLASS.value);
+        tokenXmlBuilder.addKeyword(Keyword.CLASS);
         //  className
         tokenizer.advance();
         TokenType identifierType = tokenizer.tokenType();
         String identifier = tokenizer.identifier();
         if (identifierType == TokenType.IDENTIFIER) {
-            tokenXmlBuilder.addNodeAndAttribute(TokenType.IDENTIFIER.getValue(), identifier);
+            tokenXmlBuilder.addIdentifier(identifier);
         } else {
             System.out.println("class identifier did not appear");
             return;
@@ -83,12 +83,13 @@ public class CompilationEngine {
         TokenType symbolType = tokenizer.tokenType();
         if (symbolType == TokenType.SYMBOL) {
             char symbol = tokenizer.symbol();
-            tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(symbol));
+            tokenXmlBuilder.addSymbol(symbol);
         } else {
             System.out.println("miss symbol '{' after class identifier");
             return;
         }
         tokenizer.advance();
+        //  classVarDec* subroutineDec*
         while (Symbol.CLOSE_BRACE.getValue()!=tokenizer.symbol()){
             TokenType tokenType = tokenizer.tokenType();
             if (TokenType.KEYWORD.equals(tokenType)){
@@ -105,7 +106,8 @@ public class CompilationEngine {
             }
             tokenizer.advance();
         }
-        tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(),String.valueOf(Symbol.CLOSE_BRACE.getValue()));
+        // }
+        tokenXmlBuilder.addSymbol(Symbol.CLOSE_BRACE.getValue());
         //</class>
         tokenXmlBuilder.setEndNode(Keyword.CLASS.value);
     }
@@ -114,7 +116,7 @@ public class CompilationEngine {
         // (static | field) type varName(,varName)* ';'
         tokenXmlBuilder.setStartNode("classVarDec");
         Keyword keyword = tokenizer.keyword();
-        tokenXmlBuilder.addNodeAndAttribute(TokenType.KEYWORD.getValue(),keyword.value);
+        tokenXmlBuilder.addKeyword(keyword);
         tokenizer.advance();
         TokenType tokenType = tokenizer.tokenType();
         if (tokenType==TokenType.KEYWORD){
@@ -275,25 +277,34 @@ public class CompilationEngine {
     public void compileLet() throws IOException {
         // 'let' varName ('[' expression ']')? '=' expression ';'
         tokenXmlBuilder.setStartNode("letStatement");
+        // let
         tokenXmlBuilder.addNodeAndAttribute(TokenType.KEYWORD.getValue(), Keyword.LET.value);
         tokenizer.advance();
         String identifier1 = tokenizer.identifier();
+        // varName
         tokenXmlBuilder.addNodeAndAttribute(TokenType.IDENTIFIER.getValue(),identifier1);
         tokenizer.advance();
         char symbol1 = tokenizer.symbol();
         if (symbol1 == Symbol.EQUAL.getValue()) {
+            // =
             tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(symbol1));
             tokenizer.advance();
         }else if (symbol1==Symbol.OPEN_BRACKET.getValue()){
+            // [
             tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(symbol1));
             tokenizer.advance();
+            // expression
             compileExpression();
+            // ]
             tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(),String.valueOf(Symbol.CLOSE_BRACKET.getValue()));
             tokenizer.advance();
+            // =
             tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(tokenizer.symbol()));
             tokenizer.advance();
         }
+        // expression
         compileExpression();
+        // ;
         tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(),String.valueOf(Symbol.SEMICOLON.getValue()));
         tokenXmlBuilder.setEndNode("letStatement");
     }
@@ -335,6 +346,7 @@ public class CompilationEngine {
             tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(),String.valueOf(Symbol.CLOSE_BRACE.getValue()));
             tokenizer.advance();
         }
+        tokenizer.moveBack();
         tokenXmlBuilder.setEndNode("ifStatement");
     }
 
@@ -421,35 +433,51 @@ public class CompilationEngine {
     public void compileExpression() throws IOException {
         // term(op term)*
         tokenXmlBuilder.setStartNode("expression");
+        // term
         compileTerm();
+        // op
         while (isOperationSymbol(tokenizer.symbol())) {
             tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(tokenizer.symbol()));
             tokenizer.advance();
+            // term
             compileTerm();
         }
         tokenXmlBuilder.setEndNode("expression");
-
     }
 
     public void compileTerm() throws IOException {
         // integerConstant | stringConstant | keywordConstant |
         // varName | varName[expression] | subroutineCall | (expression) | unArrayOp term
         tokenXmlBuilder.setStartNode("term");
-        // tokenizer.advance();
         TokenType tokenType = tokenizer.tokenType();
-        if (tokenType == TokenType.IDENTIFIER) {
+        if (tokenType == TokenType.INT_CONST) {
+            // integerConstant
+            int i = tokenizer.intVal();
+            tokenXmlBuilder.addNodeAndAttribute(TokenType.INT_CONST.getValue(), String.valueOf(i));
+            tokenizer.advance();
+        }else if (tokenType == TokenType.STRING_CONST) {
+            // stringConstant
+            String stringVal = tokenizer.stringVal();
+            tokenXmlBuilder.addNodeAndAttribute(TokenType.STRING_CONST.getValue(), stringVal);
+            tokenizer.advance();
+        } else if (tokenType == TokenType.KEYWORD){
+            // keywordConstant
+            String value = tokenizer.keyword().value;
+            tokenXmlBuilder.addNodeAndAttribute(TokenType.KEYWORD.getValue(),value);
+            tokenizer.advance();
+        }else if (tokenType == TokenType.IDENTIFIER) {
+            // varName
             String identifier = tokenizer.identifier();
-            // a
             tokenXmlBuilder.addNodeAndAttribute(TokenType.IDENTIFIER.getValue(), identifier);
-            // subroutine call  a.b()
-            // array entry      a[x]
-            // subroutine call  a()
             tokenizer.advance();
             TokenType nextType = tokenizer.tokenType();
             if (nextType == TokenType.SYMBOL) {
+                // op or [ or ( or .
                 char symbol = tokenizer.symbol();
                 if (Symbol.PERIOD.getValue() == symbol) {
-                    // a.
+                    // subroutineCall
+                    // subroutineName '(' expressionList ')'
+                    // (className|varName) '.' subroutineName '(' expressionList ')'
                     tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(Symbol.PERIOD.getValue()));
                     tokenizer.advance();
                     TokenType subIdentifier = tokenizer.tokenType();
@@ -470,7 +498,15 @@ public class CompilationEngine {
                             tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(symbol2));
                         }
                     }
-                } else if (Symbol.OPEN_BRACKET.getValue() == symbol) {
+                } else if (Symbol.OPEN_PAREN.getValue() == symbol) {
+                    // a(
+                    tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(symbol));
+                    // a(expressionList
+                    compileExpressionList();
+                    // a(expressionList)
+                    char symbol1 = tokenizer.symbol();
+                    tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(symbol1));
+                }else if (Symbol.OPEN_BRACKET.getValue() == symbol) {
                     // a[
                     tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(symbol));
                     // a[expression
@@ -479,54 +515,36 @@ public class CompilationEngine {
                     // a[expression]
                     char symbol1 = tokenizer.symbol();
                     tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(symbol1));
-                } else if (Symbol.OPEN_PAREN.getValue() == symbol) {
-                    // a(
-                     tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(symbol));
-                    // a(expressionList
-                    compileExpressionList();
-                    // a(expressionList)
-                     char symbol1 = tokenizer.symbol();
-                    tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(symbol1));
                 }
             }
-
         } else if (tokenType == TokenType.SYMBOL) {
             char symbol = tokenizer.symbol();
             if (symbol == Symbol.OPEN_PAREN.getValue()) {
                 compileExpressionList();
-            } else {
+            }else if(symbol ==Symbol.TILDE.getValue()||symbol==Symbol.MINUS.getValue()){
+                // unArrayOp - ~
+                tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(symbol));
+                tokenizer.advance();
+                // term
+                compileTerm();
+            }else {
                 tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(symbol));
             }
-        } else if (tokenType == TokenType.INT_CONST) {
-            int i = tokenizer.intVal();
-            tokenXmlBuilder.addNodeAndAttribute(TokenType.INT_CONST.getValue(), String.valueOf(i));
-            tokenizer.advance();
-        } else if (tokenType == TokenType.STRING_CONST) {
-            String stringVal = tokenizer.stringVal();
-            tokenXmlBuilder.addNodeAndAttribute(TokenType.STRING_CONST.getValue(), stringVal);
-            tokenizer.advance();
-        }else if (tokenType == TokenType.KEYWORD){
-            String value = tokenizer.keyword().value;
-            tokenXmlBuilder.addNodeAndAttribute(TokenType.KEYWORD.getValue(),value);
-            tokenizer.advance();
         }
-
-        // tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(Symbol.SEMICOLON.getValue()));
         tokenXmlBuilder.setEndNode("term");
     }
 
     public void compileExpressionList() throws IOException {
         // (expression(, expression)*)?
         tokenXmlBuilder.setStartNode("expressionList");
-        TokenType tokenType = tokenizer.tokenType();
         tokenizer.advance();
-        char symbol = tokenizer.symbol();
-        while (Symbol.CLOSE_PAREN.getValue() != symbol){
-            compileExpression();
-            symbol = tokenizer.symbol();
-            if (symbol==Symbol.COMMA.getValue()){
-                tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(),String.valueOf(symbol));
+        while (Symbol.CLOSE_PAREN.getValue() !=  tokenizer.symbol()){
+            if ( tokenizer.symbol() == Symbol.COMMA.getValue()){
+                tokenXmlBuilder.addSymbol( tokenizer.symbol());
                 tokenizer.advance();
+                compileExpression();
+            }else {
+                compileExpression();
             }
         }
         tokenXmlBuilder.setEndNode("expressionList");
