@@ -5,11 +5,39 @@ public class Tokenizer {
     private BufferedReader bufferedReader;
     private String currentToken;
     private boolean moveBack = false;
-
+    private File cacheFile;
     public Tokenizer(File file) {
         try {
+            cacheFile = new File(file.getPath() + "cache");
+            FileWriter fileWriter = new FileWriter(cacheFile);
             this.bufferedReader = new BufferedReader(new FileReader(file));
-        } catch (FileNotFoundException e) {
+            String line;
+            while ((line=bufferedReader.readLine())!=null){
+                if (line.startsWith("//")){
+                    continue;
+                }else if (line.contains("//")){
+                    line = line.substring(0, line.lastIndexOf("//"));
+                }else if (line.contains("/**")){
+                    if (line.contains("*/")){
+                        continue;
+                    }else {
+                        while (true){
+                            line = bufferedReader.readLine();
+                            if (line.contains("*/")){
+                                line = bufferedReader.readLine();
+                                break;
+                            }
+                        }
+                    }
+                } if (line.length()==0){
+                    continue;
+                }else {
+                    fileWriter.write(line + "\n");
+                }
+            }
+            fileWriter.close();
+            this.bufferedReader = new BufferedReader(new FileReader(cacheFile));
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -226,5 +254,8 @@ private int line = 1;
             return true;
         }
         return false;
+    }
+    public void removeCacheFile(){
+        cacheFile.delete();
     }
 }

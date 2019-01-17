@@ -1,4 +1,3 @@
-
 public enum Symbol {
     OPEN_BRACE('{'),
     CLOSE_BRACE('}'),

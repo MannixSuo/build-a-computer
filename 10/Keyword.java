@@ -18,7 +18,8 @@ public enum  Keyword {
     RETURN("return"),
     TRUE("true"),
     FALSE("false"),
-    THIS("this");
+    THIS("this"),
+    NULL("null");
     String value;
 
     Keyword(String value) {

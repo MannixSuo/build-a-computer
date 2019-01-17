@@ -2,8 +2,8 @@ import java.io.*;
 
 public class JackAnalyzer {
     public static void main(String[] args) throws IOException {
-        String fileName = "E:\\build-a-computer\\10\\ExpressionLessSquare\\Main.jack";
-        // fileName = args[0];
+        String fileName ;
+        fileName = args[0];
         File file = new File(fileName);
         File[] files ;
         if (file.isDirectory()){
@@ -16,10 +16,11 @@ public class JackAnalyzer {
         }
         for (File currentFile :files){
             Tokenizer tokenizer = new Tokenizer(currentFile);
-            File outputFile = new File(currentFile.getName().replace(".jack","test.xml"));
+            File outputFile = new File(currentFile.getAbsolutePath().replace(".jack",".xml"));
             CompilationEngine compilationEngine = new CompilationEngine(tokenizer,outputFile);
             compilationEngine.compile();
             compilationEngine.writeOutputFile();
+            tokenizer.removeCacheFile();
         }
     }
 }

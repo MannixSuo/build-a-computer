@@ -54,7 +54,6 @@ public class CompilationEngine {
                 tokenizer.advance();
             }else if (Keyword.RETURN.value.equals(keyword.value)){
                 compileReturn();
-                tokenizer.advance();
             }
             symbol = tokenizer.symbol();
             //else if (keyword.value.equals(Keyword.))
@@ -346,8 +345,9 @@ public class CompilationEngine {
             compileStatements();
             tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(),String.valueOf(Symbol.CLOSE_BRACE.getValue()));
             tokenizer.advance();
+        }else {
+            //tokenizer.moveBack();
         }
-        tokenizer.moveBack();
         tokenXmlBuilder.setEndNode("ifStatement");
     }
 
@@ -426,7 +426,6 @@ public class CompilationEngine {
         tokenizer.advance();
         char symbol = tokenizer.symbol();
         while (tokenizer.symbol() != Symbol.SEMICOLON.getValue()){
-            System.out.println("aa");
             compileExpression();
             symbol = tokenizer.symbol();
         }
@@ -526,7 +525,11 @@ public class CompilationEngine {
         } else if (tokenType == TokenType.SYMBOL) {
             char symbol = tokenizer.symbol();
             if (symbol == Symbol.OPEN_PAREN.getValue()) {
-                compileExpressionList();
+                tokenXmlBuilder.addSymbol(symbol);
+                tokenizer.advance();
+                compileExpression();
+                tokenXmlBuilder.addSymbol(tokenizer.symbol());
+                tokenizer.advance();
             }else if(symbol ==Symbol.TILDE.getValue()||symbol==Symbol.MINUS.getValue()){
                 // unArrayOp - ~
                 tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(symbol));
@@ -561,6 +564,7 @@ public class CompilationEngine {
         return symbol == Symbol.DIVIDE.getValue() || symbol == Symbol.PLUS.getValue()
                 || symbol == Symbol.MINUS.getValue() || symbol == Symbol.MULTIPLY.getValue()
                 || symbol == Symbol.GREATER_THAN.getValue() || symbol == Symbol.LESS_THAN.getValue()
-                || symbol == Symbol.VERTICAL_BAR.getValue() || symbol == Symbol.TILDE.getValue();
+                || symbol == Symbol.VERTICAL_BAR.getValue() || symbol == Symbol.TILDE.getValue()
+                || symbol == Symbol.AND.getValue() || symbol==Symbol.EQUAL.getValue();
     }
 }

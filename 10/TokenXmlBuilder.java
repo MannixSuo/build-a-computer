@@ -12,7 +12,7 @@ public class TokenXmlBuilder {
             attribute = "&gt;";
         }
         if ("&".equals(attribute)){
-            attribute = "amp;";
+            attribute = "&amp;";
         }
         stringBuilder.append(attribute);
         stringBuilder.append(String.format(" </%s>\n",node));
