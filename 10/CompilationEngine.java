@@ -304,6 +304,7 @@ public class CompilationEngine {
         }
         // expression
         compileExpression();
+        System.out.println(tokenizer.symbol());
         // ;
         tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(),String.valueOf(Symbol.SEMICOLON.getValue()));
         tokenXmlBuilder.setEndNode("letStatement");
@@ -351,6 +352,7 @@ public class CompilationEngine {
     }
 
     public void compileWhile() throws IOException {
+        System.out.println("while");
         tokenXmlBuilder.setStartNode("whileStatement");
         // while
         tokenXmlBuilder.addNodeAndAttribute(TokenType.KEYWORD.getValue(), Keyword.WHILE.value);
@@ -380,6 +382,7 @@ public class CompilationEngine {
     }
 
     public void compileDo() throws IOException {
+        System.out.println("do");
         // 'do' subroutineCall ';'
         // subroutineCall subroutineName '(' expressionList ')'
         //              | (classname|varName) '.' subroutineName '('expressionList')'
@@ -423,6 +426,7 @@ public class CompilationEngine {
         tokenizer.advance();
         char symbol = tokenizer.symbol();
         while (tokenizer.symbol() != Symbol.SEMICOLON.getValue()){
+            System.out.println("aa");
             compileExpression();
             symbol = tokenizer.symbol();
         }
@@ -474,10 +478,10 @@ public class CompilationEngine {
             if (nextType == TokenType.SYMBOL) {
                 // op or [ or ( or .
                 char symbol = tokenizer.symbol();
+                // subroutineCall
+                // subroutineName '(' expressionList ')'
+                // (className|varName) '.' subroutineName '(' expressionList ')'
                 if (Symbol.PERIOD.getValue() == symbol) {
-                    // subroutineCall
-                    // subroutineName '(' expressionList ')'
-                    // (className|varName) '.' subroutineName '(' expressionList ')'
                     tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(Symbol.PERIOD.getValue()));
                     tokenizer.advance();
                     TokenType subIdentifier = tokenizer.tokenType();
@@ -496,6 +500,7 @@ public class CompilationEngine {
                              char symbol2 = tokenizer.symbol();
                             //a.b( expressionList )
                             tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(symbol2));
+                            tokenizer.advance();
                         }
                     }
                 } else if (Symbol.OPEN_PAREN.getValue() == symbol) {
@@ -515,6 +520,7 @@ public class CompilationEngine {
                     // a[expression]
                     char symbol1 = tokenizer.symbol();
                     tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(symbol1));
+                    tokenizer.advance();
                 }
             }
         } else if (tokenType == TokenType.SYMBOL) {
