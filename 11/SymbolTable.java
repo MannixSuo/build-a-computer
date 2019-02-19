@@ -5,32 +5,46 @@ public class SymbolTable {
 
     private SymbolTable previousTable;
 
+    private Map<String, Node> nodes = new HashMap<>();
+
     private SymbolTable() {
     }
+
     private SymbolTable(SymbolTable previousTable) {
         this.previousTable = previousTable;
     }
 
-    private Map<String,Node> nodes = new HashMap<>();
 
-    public SymbolTable createClassLevelTable(String name,String type,String kind,int index){
+    public SymbolTable startSubroutine(){
+        return new SymbolTable(this);
+    }
+
+    public SymbolTable createClassLevelTable() {
         return new SymbolTable();
     }
 
-    public SymbolTable createSubroutineLevelTable(SymbolTable previousTable){
-        return new SymbolTable(previousTable);
+
+    public void addSymbol(String name, String type, String kind, String scope) {
+        Node node = new Node(name, type, kind, varCount(type), scope);
+        nodes.put("name", node);
     }
 
-    public void addSymbol(String name,String type,String kind,int index,String scope){
-        Node node = new Node(name,type,kind,index,scope);
-        nodes.put("name",node);
+    public Node getSymbol(String name) {
+        if (nodes.containsKey(name)) {
+            return nodes.get(name);
+        } else if (previousTable != null) {
+            // if not fined in current table find in previous table
+            return previousTable.getSymbol(name);
+        } else {
+            return null;
+        }
     }
 
-    public Node getSymbol(String name){
-        return nodes.getOrDefault(name,null);
+    private int varCount(String kind){
+       return (int) nodes.values().stream().filter(node -> node.kind.equals(kind)).count();
     }
 
-    private class Node{
+    private class Node {
         private String name;
         private String type;//(int, char, boolean, class name)
         private String kind;//(field, static, local, argument)

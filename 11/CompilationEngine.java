@@ -7,10 +7,12 @@ public class CompilationEngine {
     private JackTokenizer jackTokenizer;
     private File outputFile;
     private TokenXmlBuilder tokenXmlBuilder = new TokenXmlBuilder();
+    private VMWriter writer ;
 
-    public CompilationEngine(JackTokenizer jackTokenizer, File outputFile) {
+    public CompilationEngine(JackTokenizer jackTokenizer, File outputFile) throws IOException {
         this.jackTokenizer = jackTokenizer;
-        this.outputFile = outputFile;
+//        this.outputFile = outputFile;
+        this.writer = new VMWriter(outputFile);
     }
 
     public File writeOutputFile() throws IOException {
