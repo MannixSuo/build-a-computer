@@ -4,15 +4,17 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class CompilationEngine {
+
     private JackTokenizer jackTokenizer;
     private File outputFile;
     private TokenXmlBuilder tokenXmlBuilder = new TokenXmlBuilder();
-    private VMWriter writer ;
+    private VMWriter writer;
+    private SymbolTable classLevelSymbolTable;
 
     public CompilationEngine(JackTokenizer jackTokenizer, File outputFile) throws IOException {
         this.jackTokenizer = jackTokenizer;
-//        this.outputFile = outputFile;
         this.writer = new VMWriter(outputFile);
+        this.classLevelSymbolTable = SymbolTable.createClassLevelTable();
     }
 
     public File writeOutputFile() throws IOException {
@@ -66,15 +68,15 @@ public class CompilationEngine {
 
     public void compileClass() throws IOException {
         // 'class' className '{' classVarDec* subroutineDec* '}'
-        tokenXmlBuilder.setStartNode(Keyword.CLASS.value);
+        // tokenXmlBuilder.setStartNode(Keyword.CLASS.value);
         // 'class'
-        tokenXmlBuilder.addKeyword(Keyword.CLASS);
+        // tokenXmlBuilder.addKeyword(Keyword.CLASS);
         //  className
         jackTokenizer.advance();
         TokenType identifierType = jackTokenizer.tokenType();
         String identifier = jackTokenizer.identifier();
         if (identifierType == TokenType.IDENTIFIER) {
-            tokenXmlBuilder.addIdentifier(identifier);
+           // tokenXmlBuilder.addIdentifier(identifier);
         } else {
             System.out.println("class identifier did not appear");
             return;
@@ -84,7 +86,7 @@ public class CompilationEngine {
         TokenType symbolType = jackTokenizer.tokenType();
         if (symbolType == TokenType.SYMBOL) {
             char symbol = jackTokenizer.symbol();
-            tokenXmlBuilder.addSymbol(symbol);
+            // tokenXmlBuilder.addSymbol(symbol);
         } else {
             System.out.println("miss symbol '{' after class identifier");
             return;
@@ -115,65 +117,63 @@ public class CompilationEngine {
 
     public void compileClassVarDec() throws IOException {
         // (static | field) type varName(,varName)* ';'
-        tokenXmlBuilder.setStartNode("classVarDec");
-        Keyword keyword = jackTokenizer.keyword();
+        Keyword varScopeKeyword = jackTokenizer.keyword();
         // (static | field)
-        tokenXmlBuilder.addKeyword(keyword);
+        String kind = varScopeKeyword.value;
         jackTokenizer.advance();
         TokenType tokenType = jackTokenizer.tokenType();
         // type
+        String varType = "";
         if (tokenType==TokenType.KEYWORD){
-            String value = jackTokenizer.keyword().value;
-            tokenXmlBuilder.addNodeAndAttribute(TokenType.KEYWORD.getValue(),value);
+            varType = jackTokenizer.keyword().value;
         }else if (TokenType.IDENTIFIER==tokenType){
-            String identifier = jackTokenizer.identifier();
-            tokenXmlBuilder.addNodeAndAttribute(TokenType.IDENTIFIER.getValue(),identifier);
+            varType = jackTokenizer.identifier();
         }
         jackTokenizer.advance();
         // varName
-        String identifier1 = jackTokenizer.identifier();
-        tokenXmlBuilder.addNodeAndAttribute(TokenType.IDENTIFIER.getValue(),identifier1);
+        String varName = jackTokenizer.identifier();
+
+        classLevelSymbolTable.addClassLevelSymbol(varName,varType,kind);
         jackTokenizer.advance();
         char symbol = jackTokenizer.symbol();
         while (symbol!=Symbol.SEMICOLON.getValue()){
             // ,
-            tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(),String.valueOf(symbol));
             jackTokenizer.advance();
             // varName
-            String identifier = jackTokenizer.identifier();
-            tokenXmlBuilder.addNodeAndAttribute(TokenType.IDENTIFIER.getValue(),identifier);
+            varName = jackTokenizer.identifier();
+
+            classLevelSymbolTable.addClassLevelSymbol(varName,varType,kind);
+
             jackTokenizer.advance();
             symbol = jackTokenizer.symbol();
         }
-        tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(),String.valueOf(symbol));
-        tokenXmlBuilder.setEndNode("classVarDec");
-
     }
 
     public void compileSubroutineDec() throws IOException {
         // (constructor|function|method) (void|type) subroutineName (parameterList) subroutineBody
-        tokenXmlBuilder.setStartNode("subroutineDec");
+        // tokenXmlBuilder.setStartNode("subroutineDec");
+        SymbolTable subroutine = classLevelSymbolTable.startSubroutine();
         Keyword keyword = jackTokenizer.keyword();
-        tokenXmlBuilder.addNodeAndAttribute(TokenType.KEYWORD.getValue(), keyword.value);
+        // tokenXmlBuilder.addNodeAndAttribute(TokenType.KEYWORD.getValue(), keyword.value);
         jackTokenizer.advance();
         TokenType keywordOrIdentifierType = jackTokenizer.tokenType();
         if (keywordOrIdentifierType == TokenType.KEYWORD) {
-            tokenXmlBuilder.addNodeAndAttribute(TokenType.KEYWORD.getValue(), jackTokenizer.keyword().value);
+           // tokenXmlBuilder.addNodeAndAttribute(TokenType.KEYWORD.getValue(), jackTokenizer.keyword().value);
         } else if (keywordOrIdentifierType==TokenType.IDENTIFIER){
-            tokenXmlBuilder.addNodeAndAttribute(TokenType.IDENTIFIER.getValue(), jackTokenizer.identifier());
+            // tokenXmlBuilder.addNodeAndAttribute(TokenType.IDENTIFIER.getValue(), jackTokenizer.identifier());
         }
         jackTokenizer.advance();
         TokenType identifierType = jackTokenizer.tokenType();
         if (identifierType == TokenType.IDENTIFIER) {
-            tokenXmlBuilder.addNodeAndAttribute(TokenType.IDENTIFIER.getValue(), jackTokenizer.identifier());
+            // tokenXmlBuilder.addNodeAndAttribute(TokenType.IDENTIFIER.getValue(), jackTokenizer.identifier());
         } else {
             System.out.println("miss identifier after subroutine keyword");
         }
         jackTokenizer.advance();
         char symbol = jackTokenizer.symbol();
-        tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(),String.valueOf(symbol));
+        // tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(),String.valueOf(symbol));
         compileParameterList();
-        tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), ")");
+        // tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), ")");
         jackTokenizer.advance();
         compileSubroutineBody();
         tokenXmlBuilder.setEndNode("subroutineDec");

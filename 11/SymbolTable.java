@@ -2,6 +2,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SymbolTable {
+    private static String CLASS_LEVEL = "CLASS";
+    private static String SUBROUTINE_LEVEL = "SUBROUTINE";
 
     private SymbolTable previousTable;
 
@@ -19,13 +21,18 @@ public class SymbolTable {
         return new SymbolTable(this);
     }
 
-    public SymbolTable createClassLevelTable() {
+    public static SymbolTable createClassLevelTable() {
         return new SymbolTable();
     }
 
 
-    public void addSymbol(String name, String type, String kind, String scope) {
-        Node node = new Node(name, type, kind, varCount(type), scope);
+    public void addClassLevelSymbol(String name, String type, String kind) {
+        Node node = new Node(name, type, kind, varCount(kind), CLASS_LEVEL);
+        nodes.put(name, node);
+    }
+
+    public void addSubroutineevelSymbol(String name, String type, String kind) {
+        Node node = new Node(name, type, kind, varCount(kind), CLASS_LEVEL);
         nodes.put("name", node);
     }
 
