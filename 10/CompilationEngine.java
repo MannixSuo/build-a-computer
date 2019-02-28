@@ -94,13 +94,13 @@ public class CompilationEngine {
             if (TokenType.KEYWORD.equals(tokenType)){
                 Keyword keyword = tokenizer.keyword();
                 if (Keyword.FIELD.equals(keyword) || Keyword.STATIC.equals(keyword)){
-                    compileClassVarDec();
+                    compileClassVarDec(classLevelSymbolTable);
                 }else if (Keyword.FUNCTION.equals(keyword)){
-                    compileSubroutineDec();
+                    compileSubroutineDec(classLevelSymbolTable);
                 }else if (Keyword.METHOD.equals(keyword)){
-                    compileSubroutineDec();
+                    compileSubroutineDec(classLevelSymbolTable);
                 }else if (Keyword.CONSTRUCTOR.equals(keyword)){
-                    compileSubroutineDec();
+                    compileSubroutineDec(classLevelSymbolTable);
                 }
             }
             tokenizer.advance();
@@ -166,10 +166,10 @@ public class CompilationEngine {
         tokenizer.advance();
         char symbol = tokenizer.symbol();
         tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(),String.valueOf(symbol));
-        compileParameterList();
+        compileParameterList(subroutineSymbolTable);
         tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), ")");
         tokenizer.advance();
-        compileSubroutineBody();
+        compileSubroutineBody(subroutineSymbolTable);
         tokenXmlBuilder.setEndNode("subroutineDec");
     }
 
@@ -224,7 +224,7 @@ public class CompilationEngine {
             if (tokenType == TokenType.KEYWORD) {
                 Keyword keyword = tokenizer.keyword();
                 if (keyword.value.equals(Keyword.VAR.value)) {
-                    compileVarDec();
+                    compileVarDec(subroutineSymbolTable);
                 } else {
                     compileStatements();
                     tokenizer.advance();

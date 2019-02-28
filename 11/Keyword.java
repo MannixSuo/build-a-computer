@@ -42,4 +42,8 @@ public enum  Keyword {
         }
         return null;
     }
+
+    public boolean is(Keyword keyword){
+        return this.value.equals(keyword.value);
+    }
 }

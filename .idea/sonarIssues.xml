@@ -18,6 +18,16 @@
             <set />
           </value>
         </entry>
+        <entry key="$PROJECT_DIR$/11/Keyword.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/11/Node.java">
+          <value>
+            <set />
+          </value>
+        </entry>
         <entry key="$PROJECT_DIR$/11/SymbolTable.java">
           <value>
             <set />
@@ -33,7 +43,67 @@
             <set />
           </value>
         </entry>
+        <entry key="E:/hxy/demo/src/main/java/com/example/demo/controller/VmController.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="E:/hxy/demo/src/main/java/com/example/demo/mapper/StudentsMapper.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="E:/hxy/demo/src/main/java/com/example/demo/po/Students.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="E:/hxy/demo/src/main/resources/mapping/StudentsMapper.xml">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="E:/work/quota/src/main/java/com/travelsky/travelcloud/service/impl/QuotaServiceImpl.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="E:/work/server-service/src/main/java/com/travelsky/travelcloud/controller/VolumeController.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="E:/work/server-service/src/main/java/com/travelsky/travelcloud/service/impl/VolumeServiceImpl.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="E:/work/server-service/src/main/resources/mapping/VolumeMapper.xml">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="E:/work/server/src/main/java/com/travelsky/travelcloud/controller/VmController.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="E:/work/server/src/main/java/com/travelsky/travelcloud/process/vm/VmNodeServiceImpl.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="E:/work/server/src/main/java/com/travelsky/travelcloud/utils/QuotaUtils.java">
+          <value>
+            <set />
+          </value>
+        </entry>
         <entry key="E:/work/server/src/main/java/com/travelsky/travelcloud/utils/ScheduleUtil.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="E:/work/server/src/main/java/com/travelsky/travelcloud/utils/ServerUtil.java">
           <value>
             <set />
           </value>
