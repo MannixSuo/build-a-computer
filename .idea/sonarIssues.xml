@@ -43,6 +43,11 @@
             <set />
           </value>
         </entry>
+        <entry key="$PROJECT_DIR$/11/VMWriter.java">
+          <value>
+            <set />
+          </value>
+        </entry>
         <entry key="E:/hxy/demo/src/main/java/com/example/demo/controller/VmController.java">
           <value>
             <set />
@@ -83,12 +88,42 @@
             <set />
           </value>
         </entry>
+        <entry key="E:/work/server/src/main/java/com/travelsky/travelcloud/controller/DiskController.java">
+          <value>
+            <set />
+          </value>
+        </entry>
         <entry key="E:/work/server/src/main/java/com/travelsky/travelcloud/controller/VmController.java">
           <value>
             <set />
           </value>
         </entry>
+        <entry key="E:/work/server/src/main/java/com/travelsky/travelcloud/feigimpl/ServerServiceFeign.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="E:/work/server/src/main/java/com/travelsky/travelcloud/process/vm/VmNode.java">
+          <value>
+            <set />
+          </value>
+        </entry>
         <entry key="E:/work/server/src/main/java/com/travelsky/travelcloud/process/vm/VmNodeServiceImpl.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="E:/work/server/src/main/java/com/travelsky/travelcloud/service/DiskService.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="E:/work/server/src/main/java/com/travelsky/travelcloud/service/impl/DiskServiceImpl.java">
+          <value>
+            <set />
+          </value>
+        </entry>
+        <entry key="E:/work/server/src/main/java/com/travelsky/travelcloud/utils/NodeExceptionHandler.java">
           <value>
             <set />
           </value>

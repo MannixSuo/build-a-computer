@@ -10,11 +10,12 @@ public class VMWriter {
         this.outputFileWriter = new BufferedWriter(new FileWriter(outputFile));
     }
 
-    public void writePush(String segments, int index) throws IOException {
+    private void writePush(String segments, int index) throws IOException {
         outputFileWriter.write(String.format("push %s %d", segments, index));
     }
 
-    public void writePop(String segments, int index) throws IOException {
+
+    private void writePop(String segments, int index) throws IOException {
         outputFileWriter.write(String.format("pop %s %d", segments, index));
     }
 
@@ -44,6 +45,27 @@ public class VMWriter {
     public void writeReturn() throws IOException {
         outputFileWriter.write("return");
     }
+
+    public void writePushSymbol(Node symbol) throws IOException {
+        if (Node.KIND_FIELD.equals(symbol.getKind())){
+            writePush("this",symbol.getIndex());
+        }else {
+            writePush(symbol.getKind(),symbol.getIndex());
+        }
+    }
+
+    public void writePopSymbol(Node symbol) throws IOException {
+        if (Node.KIND_FIELD.equals(symbol.getKind())){
+            writePop("this",symbol.getIndex());
+        }else {
+            writePop(symbol.getKind(),symbol.getIndex());
+        }
+    }
+
+    public void writePushConst(int constant) throws IOException {
+        writePush("constant",constant);
+    }
+
     public void close() throws IOException {
         outputFileWriter.flush();
         outputFileWriter.close();

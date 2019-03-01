@@ -42,18 +42,18 @@ public class CompilationEngine {
             Keyword keyword = tokenizer.keyword();
             if (keyword==null){ break;}
             if (Keyword.LET.value.equals(keyword.value)) {
-                compileLet();
+                compileLet(subroutineSymbolTable);
                 tokenizer.advance();
             } else if (Keyword.WHILE.value.equals(keyword.value)) {
-                compileWhile();
+                compileWhile(subroutineSymbolTable);
                 tokenizer.advance();
             } else if (Keyword.IF.value.equals(keyword.value)) {
-                compileIf();
+                compileIf(subroutineSymbolTable);
             } else if (Keyword.DO.value.equals(keyword.value)){
-                compileDo();
+                compileDo(subroutineSymbolTable);
                 tokenizer.advance();
             }else if (Keyword.RETURN.value.equals(keyword.value)){
-                compileReturn();
+                compileReturn(subroutineSymbolTable);
             }
             symbol = tokenizer.symbol();
             //else if (keyword.value.equals(Keyword.))
@@ -226,7 +226,7 @@ public class CompilationEngine {
                 if (keyword.value.equals(Keyword.VAR.value)) {
                     compileVarDec(subroutineSymbolTable);
                 } else {
-                    compileStatements();
+                    compileStatements(subroutineSymbolTable);
                     tokenizer.advance();
                 }
             }
@@ -293,7 +293,7 @@ public class CompilationEngine {
             tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(symbol1));
             tokenizer.advance();
             // expression
-            compileExpression();
+            compileExpression(subroutineSymbolTable);
             // ]
             tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(),String.valueOf(Symbol.CLOSE_BRACKET.getValue()));
             tokenizer.advance();
@@ -302,7 +302,7 @@ public class CompilationEngine {
             tokenizer.advance();
         }
         // expression
-        compileExpression();
+        compileExpression(subroutineSymbolTable);
         System.out.println(tokenizer.symbol());
         // ;
         tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(),String.valueOf(Symbol.SEMICOLON.getValue()));
@@ -320,7 +320,7 @@ public class CompilationEngine {
         tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(),String.valueOf(symbol));
         // if( expression
         tokenizer.advance();
-        compileExpression();
+        compileExpression(subroutineSymbolTable);
         // if(expression)
         char symbol1 = tokenizer.symbol();
         tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(),String.valueOf(symbol1));
@@ -330,7 +330,7 @@ public class CompilationEngine {
         tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(),String.valueOf(symbol2));
         tokenizer.advance();
         // if(expression){ statements
-        compileStatements();
+        compileStatements(subroutineSymbolTable);
         // tokenizer.advance();
         // if(expression){statements }
         char symbol3 = tokenizer.symbol();
@@ -342,7 +342,7 @@ public class CompilationEngine {
             tokenizer.advance();
             tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(),String.valueOf(tokenizer.symbol()));
             tokenizer.advance();
-            compileStatements();
+            compileStatements(subroutineSymbolTable);
             tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(),String.valueOf(Symbol.CLOSE_BRACE.getValue()));
             tokenizer.advance();
         }else {
@@ -364,7 +364,7 @@ public class CompilationEngine {
             tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(symbol));
         }
         tokenizer.advance();
-        compileExpression();
+        compileExpression(subroutineSymbolTable);
         char symbol = tokenizer.symbol();
         //while(expression )
         tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(symbol));
@@ -374,7 +374,7 @@ public class CompilationEngine {
         tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(symbol1));
         // while(expression){ statements
         tokenizer.advance();
-        compileStatements();
+        compileStatements(subroutineSymbolTable);
         // while(expression){statements}
         char symbol3 = tokenizer.symbol();
         tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(),String.valueOf(symbol3));
@@ -408,7 +408,7 @@ public class CompilationEngine {
         char symbol1 = tokenizer.symbol();
         tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(),String.valueOf(symbol1));
         // do a.b(expressionList
-        compileExpressionList();
+        compileExpressionList(subroutineSymbolTable);
         // do a.b(expressionList)
         char symbol2 = tokenizer.symbol();
         tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(),String.valueOf(symbol2));
@@ -426,7 +426,7 @@ public class CompilationEngine {
         tokenizer.advance();
         char symbol = tokenizer.symbol();
         while (tokenizer.symbol() != Symbol.SEMICOLON.getValue()){
-            compileExpression();
+            compileExpression(subroutineSymbolTable);
             symbol = tokenizer.symbol();
         }
         tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(),String.valueOf(symbol));
@@ -437,13 +437,13 @@ public class CompilationEngine {
         // term(op term)*
         tokenXmlBuilder.setStartNode("expression");
         // term
-        compileTerm();
+        compileTerm(subroutineSymbolTable);
         // op
         while (isOperationSymbol(tokenizer.symbol())) {
             tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(tokenizer.symbol()));
             tokenizer.advance();
             // term
-            compileTerm();
+            compileTerm(subroutineSymbolTable);
         }
         tokenXmlBuilder.setEndNode("expression");
     }
@@ -494,7 +494,7 @@ public class CompilationEngine {
                             // a.b(
                              tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(symbol1));
                             // expressionList
-                            compileExpressionList();
+                            compileExpressionList(subroutineSymbolTable);
                              // tokenizer.advance();
                              char symbol2 = tokenizer.symbol();
                             //a.b( expressionList )
@@ -506,7 +506,7 @@ public class CompilationEngine {
                     // a(
                     tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(symbol));
                     // a(expressionList
-                    compileExpressionList();
+                    compileExpressionList(subroutineSymbolTable);
                     // a(expressionList)
                     char symbol1 = tokenizer.symbol();
                     tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(symbol1));
@@ -515,7 +515,7 @@ public class CompilationEngine {
                     tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(symbol));
                     // a[expression
                     tokenizer.advance();
-                    compileExpression();
+                    compileExpression(subroutineSymbolTable);
                     // a[expression]
                     char symbol1 = tokenizer.symbol();
                     tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(symbol1));
@@ -527,7 +527,7 @@ public class CompilationEngine {
             if (symbol == Symbol.OPEN_PAREN.getValue()) {
                 tokenXmlBuilder.addSymbol(symbol);
                 tokenizer.advance();
-                compileExpression();
+                compileExpression(subroutineSymbolTable);
                 tokenXmlBuilder.addSymbol(tokenizer.symbol());
                 tokenizer.advance();
             }else if(symbol ==Symbol.TILDE.getValue()||symbol==Symbol.MINUS.getValue()){
@@ -535,7 +535,7 @@ public class CompilationEngine {
                 tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(symbol));
                 tokenizer.advance();
                 // term
-                compileTerm();
+                compileTerm(subroutineSymbolTable);
             }else {
                 tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(symbol));
             }
@@ -551,9 +551,9 @@ public class CompilationEngine {
             if ( tokenizer.symbol() == Symbol.COMMA.getValue()){
                 tokenXmlBuilder.addSymbol( tokenizer.symbol());
                 tokenizer.advance();
-                compileExpression();
+                compileExpression(subroutineSymbolTable);
             }else {
-                compileExpression();
+                compileExpression(subroutineSymbolTable);
             }
         }
         tokenXmlBuilder.setEndNode("expressionList");
