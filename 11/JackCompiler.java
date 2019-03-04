@@ -21,8 +21,8 @@ public class JackCompiler {
             File outputFile = new File(currentFile.getAbsolutePath().replace(".jack",".vm"));
             CompilationEngine compilationEngine = new CompilationEngine(tokenizer,outputFile);
             compilationEngine.compile();
-//            compilationEngine.writeOutputFile();
-//            tokenizer.removeCacheFile();
+            compilationEngine.writeOutputFile();
+            tokenizer.removeCacheFile();
         }
     }
 }
