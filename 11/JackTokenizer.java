@@ -3,9 +3,28 @@ import java.io.*;
 public class JackTokenizer {
 
     private BufferedReader bufferedReader;
+    private int maxCacheSize = 20;
+    // circle byte
+    byte[] cache = new byte[maxCacheSize];
+    private int start = 0,end = 0;
     private String currentToken;
     private boolean moveBack = false;
     private File cacheFile;
+
+    private int read1() throws IOException {
+        int read = bufferedReader.read();
+        return read;
+    }
+
+    private int newStart(){
+        if (start==20){
+            start = 0;
+        } else {
+            start = start + 1;
+        }
+        return start;
+    }
+
     public JackTokenizer(File file) {
         try {
             cacheFile = new File(file.getPath() + "cache");
@@ -255,7 +274,8 @@ private int line = 1;
         }
         return false;
     }
-    public void removeCacheFile(){
-        cacheFile.delete();
+    public void removeCacheFile() throws IOException {
+        bufferedReader.close();
+        boolean delete = cacheFile.delete();
     }
 }

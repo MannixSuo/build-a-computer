@@ -5,7 +5,7 @@ public class JackCompiler {
     public static void main(String[] args) throws IOException {
         String fileName ;
         // fileName = args[0];
-        fileName =  "E:\\build-a-computer\\11\\Test.jack";
+        fileName =  "/home/mannix/Nand2Teris/build-a-computer/11/Test.jack";
         File file = new File(fileName);
         File[] files ;
         if (file.isDirectory()){
@@ -21,8 +21,8 @@ public class JackCompiler {
             File outputFile = new File(currentFile.getAbsolutePath().replace(".jack",".vm"));
             CompilationEngine compilationEngine = new CompilationEngine(tokenizer,outputFile);
             compilationEngine.compile();
-//            compilationEngine.writeOutputFile();
-//            tokenizer.removeCacheFile();
+            compilationEngine.writeOutputFile();
+            tokenizer.removeCacheFile();
         }
     }
 }
