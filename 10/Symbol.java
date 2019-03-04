@@ -19,7 +19,6 @@ public enum Symbol {
     EQUAL('='),
     TILDE('~');
     private char value;
-
     Symbol(char value) {
         this.value = value;
     }

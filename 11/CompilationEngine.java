@@ -279,8 +279,7 @@ public class CompilationEngine {
         // varName
         String varName = jackTokenizer.identifier();
         Node symbol = subroutineSymbolTable.getSymbol(varName);
-        // push  kind index
-        writer.writePushSymbol(symbol);
+
 
         jackTokenizer.advance();
         char symbol1 = jackTokenizer.symbol();
@@ -299,6 +298,9 @@ public class CompilationEngine {
         }
         // expression
         compileExpression(subroutineSymbolTable);
+
+        // pop  kind index
+        writer.writePopSymbol(symbol);
         System.out.println(jackTokenizer.symbol());
         // ;
     }
@@ -433,10 +435,12 @@ public class CompilationEngine {
         compileTerm(subroutineSymbolTable);
         // op
         while (isOperationSymbol(jackTokenizer.symbol())) {
-            tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(jackTokenizer.symbol()));
+            // op
+            char op = jackTokenizer.symbol();
             jackTokenizer.advance();
             // term
             compileTerm(subroutineSymbolTable);
+            writer.writeArithmetic(op);
         }
         tokenXmlBuilder.setEndNode("expression");
     }
@@ -444,7 +448,6 @@ public class CompilationEngine {
     public void compileTerm(SymbolTable subroutineSymbolTable) throws IOException {
         // integerConstant | stringConstant | keywordConstant |
         // varName | varName[expression] | subroutineCall | (expression) | unArrayOp term
-        tokenXmlBuilder.setStartNode("term");
         TokenType tokenType = jackTokenizer.tokenType();
         if (tokenType == TokenType.INT_CONST) {
             // integerConstant

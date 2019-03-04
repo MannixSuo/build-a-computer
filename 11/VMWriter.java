@@ -19,8 +19,8 @@ public class VMWriter {
         outputFileWriter.write(String.format("pop %s %d", segments, index));
     }
 
-    public void writeArithmetic(Symbol command) throws IOException {
-        outputFileWriter.write(command.getValue());
+    public void writeArithmetic(char command) throws IOException {
+        outputFileWriter.write(command);
     }
 
     public void writeLabel(String label) throws IOException {
