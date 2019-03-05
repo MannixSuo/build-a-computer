@@ -4,8 +4,9 @@ class Point {
     method int distance(int a,int b,int c,Point d){
         if(a > b){
             let a = 3;
-        }else{
-        let a = 5;
+        }
+        while((a+b)*30 > (100-10) ){
+            let a = a + 1;
         }
     }
     method int aMethod(int a,int b,Point c){

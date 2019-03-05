@@ -324,10 +324,11 @@ public class CompilationEngine {
         jackTokenizer.advance();
         compileExpression(subroutineSymbolTable);
 
-        writer.writeLogic('~');
-        String L1 = String.format("L%d", generateLabel());
-        writer.writeIf(L1);
+        String label1 = String.format("L%d", generateLabel());
+        String label2 = String.format("L%d", generateLabel());
 
+        writer.writeLogic('~');
+        writer.writeIf(label1);
         // if(expression)
         char symbol1 = jackTokenizer.symbol();
         jackTokenizer.advance();
@@ -338,58 +339,58 @@ public class CompilationEngine {
 
         compileStatements(subroutineSymbolTable);
 
+        writer.writeGoto(label2);
+        writer.writeLabel(label1);
         // jackTokenizer.advance();
         // if(expression){statements }
         char symbol3 = jackTokenizer.symbol();
-        tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(symbol3));
         jackTokenizer.advance();
         Keyword keyword = jackTokenizer.keyword();
         if (keyword == Keyword.ELSE) {
 
-            String L2 = String.format("L%d", generateLabel());
-            writer.writeGoto(L2);
+            jackTokenizer.advance();
+            jackTokenizer.advance();
 
-            jackTokenizer.advance();
-            jackTokenizer.advance();
-            writer.writeLabel(L2);
             compileStatements(subroutineSymbolTable);
             jackTokenizer.advance();
 
-            writer.writeLabel(L2);
+            writer.writeGoto(label2);
         } else {
             //jackTokenizer.moveBack();
         }
-        writer.writeLabel(L1);
+        writer.writeLabel(label2);
     }
 
     public void compileWhile(SymbolTable subroutineSymbolTable) throws IOException {
         System.out.println("while");
-        tokenXmlBuilder.setStartNode("whileStatement");
         // while
-        tokenXmlBuilder.addNodeAndAttribute(TokenType.KEYWORD.getValue(), Keyword.WHILE.value);
         jackTokenizer.advance();
         TokenType tokenType = jackTokenizer.tokenType();
         if (tokenType == TokenType.SYMBOL) {
             // while (
             char symbol = jackTokenizer.symbol();
-            tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(symbol));
         }
         jackTokenizer.advance();
+        String label1 = String.format("L%d", generateLabel());
+        String label2 = String.format("L%d", generateLabel());
+
+        writer.writeLabel(label1);
         compileExpression(subroutineSymbolTable);
+        writer.writeLogic('~');
+        writer.writeIf(label2);
         char symbol = jackTokenizer.symbol();
         //while(expression )
         tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(symbol));
         jackTokenizer.advance();
         char symbol1 = jackTokenizer.symbol();
         // while(expression) {
-        tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(symbol1));
         // while(expression){ statements
         jackTokenizer.advance();
         compileStatements(subroutineSymbolTable);
+        writer.writeGoto(label1);
         // while(expression){statements}
         char symbol3 = jackTokenizer.symbol();
-        tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(symbol3));
-        tokenXmlBuilder.setEndNode("whileStatement");
+        writer.writeLabel(label2);
     }
 
     public void compileDo(SymbolTable subroutineSymbolTable) throws IOException {
@@ -487,6 +488,7 @@ public class CompilationEngine {
         } else if (tokenType == TokenType.KEYWORD) {
             // keywordConstant
             String value = jackTokenizer.keyword().value;
+            System.out.println("there is a keyword in the term :" + value);
             jackTokenizer.advance();
         } else if (tokenType == TokenType.IDENTIFIER) {
             // varName
