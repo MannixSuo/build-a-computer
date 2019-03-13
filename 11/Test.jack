@@ -1,15 +1,18 @@
 class Point {
-    field int x,y,z;
+    field int x, y;
     static int pointCount;
-    method int distance(int a,int b,int c,Point d){
-        if(a > b){
-            let a = 3;
-        }
-        while((a+b)*30 > (100-10) ){
-            let a = a + 1;
-        }
+
+    constructor Point new(int ax,int ay) {
+        let x = ax;
+        let y = ay;
+        let pointCount = pointCount + 1;
+        return this;
     }
-    method int aMethod(int a,int b,Point c){
-        var int dx,dy;
-    }
+
+    method int distance(Point other) {
+     var int dx, dy;
+     let dx = x - other.getx();
+     let dy = y - other.gety();
+     return Math.sqrt((dx*dx)+ (dy*dy));
+     }
 }

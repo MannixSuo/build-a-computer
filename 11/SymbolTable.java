@@ -47,9 +47,17 @@ public class SymbolTable {
         }
     }
 
-    private int varCount(String kind){
+    public int varCount(String kind){
        return (int) nodes.values().stream().filter(node -> node.getKind().equals(kind)).count();
     }
 
 
+    public String typeOf(String identifier) {
+        Node symbol = getSymbol(identifier);
+        if (symbol == null ){
+            return identifier;
+        }else {
+         return symbol.getType();
+        }
+    }
 }

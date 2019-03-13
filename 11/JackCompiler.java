@@ -5,7 +5,7 @@ public class JackCompiler {
     public static void main(String[] args) throws IOException {
         String fileName ;
         // fileName = args[0];
-        fileName =  "/home/mannix/Nand2Teris/build-a-computer/11/Test.jack";
+        fileName =  "11/Test.jack";
         File file = new File(fileName);
         File[] files ;
         if (file.isDirectory()){

@@ -1,28 +1,36 @@
+function Point.new 2 
+push constant 2 
+call  Memory.alloc 1 
+pop pointer 0 
+push argument 0 
+pop this 0 
 push argument 1 
-push argument 2 
-gt 
-not 
-if-goto L0 
-push constant 3 
-pop argument 1 
-goto L1 
-label L0 
-label L1 
-label L2 
-push argument 1 
-push argument 2 
-add 
-push constant 30 
-call Math.multiply 2 
-push constant 100 
-push constant 10 
-sub 
-gt 
-not 
-if-goto L3 
-push argument 1 
+pop this 1 
+push static 0 
 push constant 1 
 add 
-pop argument 1 
-goto L2 
-label L3 
+pop static 0 
+push pointer 0 
+return 
+function Point.distance 1 
+push argument 0 
+pop pointer 0 
+push this 0 
+push argument 0 
+call Point.getx 1 
+sub 
+pop local 0 
+push this 1 
+push argument 0 
+call Point.gety 1 
+sub 
+pop local 1 
+push local 0 
+push local 0 
+call Math.multiply 2 
+push local 1 
+push local 1 
+call Math.multiply 2 
+add 
+call Math.sqrt 1 
+return 

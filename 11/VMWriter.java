@@ -10,12 +10,12 @@ public class VMWriter {
         this.outputFileWriter = new BufferedWriter(new FileWriter(outputFile));
     }
 
-    private void writePush(String segments, int index) throws IOException {
+    public void writePush(String segments, int index) throws IOException {
         outputFileWriter.write(String.format("push %s %d %n", segments, index));
     }
 
 
-    private void writePop(String segments, int index) throws IOException {
+    public void writePop(String segments, int index) throws IOException {
         outputFileWriter.write(String.format("pop %s %d %n", segments, index));
     }
 
@@ -70,7 +70,7 @@ public class VMWriter {
         outputFileWriter.write(String.format("function %s %d %n",name,nLocals));
     }
     public void writeReturn() throws IOException {
-        outputFileWriter.write("return %n");
+        outputFileWriter.write(String.format("return %n"));
     }
 
     public void writePushSymbol(Node symbol) throws IOException {
@@ -96,5 +96,13 @@ public class VMWriter {
     public void close() throws IOException {
         outputFileWriter.flush();
         outputFileWriter.close();
+    }
+
+    public void popPointer(int index) throws IOException {
+        outputFileWriter.write(String.format("pop %s %d %n", "pointer", index));
+    }
+
+    public void pushPointer(int index) throws IOException {
+        outputFileWriter.write(String.format("push %s %d %n", "pointer", index));
     }
 }

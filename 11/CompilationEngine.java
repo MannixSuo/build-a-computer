@@ -152,8 +152,8 @@ public class CompilationEngine {
         // (constructor|function|method)
         Keyword keyword = jackTokenizer.keyword();
 
-        if (keyword.is(Keyword.METHOD)) {
-            subroutineSymbolTable.addSubroutineLevelSymbol("this", className, Node.KIND_ARGUMENT);
+        if (keyword.is(Keyword.FUNCTION)){
+            // todo
         }
         jackTokenizer.advance();
 
@@ -166,24 +166,40 @@ public class CompilationEngine {
 
         jackTokenizer.advance();
         // subroutineName
-        TokenType identifierType = jackTokenizer.tokenType();
-        if (identifierType == TokenType.IDENTIFIER) {
+        TokenType tokenType = jackTokenizer.tokenType();
+        String identifier = jackTokenizer.identifier();
+        if (tokenType == TokenType.IDENTIFIER) {
         } else {
             System.out.println("miss identifier after subroutine keyword");
         }
         jackTokenizer.advance();
         // (
         char symbol = jackTokenizer.symbol();
-        compileParameterList(subroutineSymbolTable);
+        Integer argNum = compileParameterList(subroutineSymbolTable);
+        writer.writeFunction(className.concat(".").concat(identifier),argNum);
+
+        if(keyword.is(Keyword.CONSTRUCTOR)){
+            int field = classLevelSymbolTable.varCount("field");
+            writer.writePushConst(field);
+            writer.writeCall(" Memory.alloc",1);
+            writer.popPointer(0);
+        }
+
+        if (keyword.is(Keyword.METHOD)) {
+            subroutineSymbolTable.addSubroutineLevelSymbol("this", className, Node.KIND_ARGUMENT);
+            writer.writePush("argument",0);
+            writer.popPointer(0);
+        }
+
         // )
         jackTokenizer.advance();
         compileSubroutineBody(subroutineSymbolTable);
-        tokenXmlBuilder.setEndNode("subroutineDec");
     }
 
-    public void compileParameterList(SymbolTable subroutineSymbolTable) throws IOException {
+    public Integer compileParameterList(SymbolTable subroutineSymbolTable) throws IOException {
         // (type varName (,type varName)*)?
         jackTokenizer.advance();
+        Integer argNum = 0;
         while (jackTokenizer.symbol() != ')') {
             // type
             TokenType keywordOrIdentifier = jackTokenizer.tokenType();
@@ -215,7 +231,9 @@ public class CompilationEngine {
                     jackTokenizer.advance();
                 }
             }
+            argNum++;
         }
+        return argNum;
     }
 
     public void compileSubroutineBody(SymbolTable subroutineSymbolTable) throws IOException {
@@ -308,7 +326,7 @@ public class CompilationEngine {
         }
         // expression
         compileExpression(subroutineSymbolTable);
-        System.out.println(jackTokenizer.symbol());
+        assert Symbol.SEMICOLON.getValue()==jackTokenizer.symbol();
         // ;
         // pop  kind index
         writer.writePopSymbol(symbol);
@@ -420,6 +438,7 @@ public class CompilationEngine {
         char symbol1 = jackTokenizer.symbol();
         tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(symbol1));
         // do a.b(expressionList
+        int argNum = 0;
         compileExpressionList(subroutineSymbolTable);
         // do a.b(expressionList)
         char symbol2 = jackTokenizer.symbol();
@@ -433,16 +452,14 @@ public class CompilationEngine {
 
     public void compileReturn(SymbolTable subroutineSymbolTable) throws IOException {
         // return expression? ;
-        tokenXmlBuilder.setStartNode("returnStatement");
-        tokenXmlBuilder.addNodeAndAttribute(TokenType.KEYWORD.getValue(), Keyword.RETURN.value);
         jackTokenizer.advance();
         char symbol = jackTokenizer.symbol();
         while (jackTokenizer.symbol() != Symbol.SEMICOLON.getValue()) {
             compileExpression(subroutineSymbolTable);
             symbol = jackTokenizer.symbol();
         }
-        tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(symbol));
-        tokenXmlBuilder.setEndNode("returnStatement");
+        writer.writeReturn();
+        jackTokenizer.advance();
     }
 
     public void compileExpression(SymbolTable subroutineSymbolTable) throws IOException {
@@ -488,13 +505,23 @@ public class CompilationEngine {
         } else if (tokenType == TokenType.KEYWORD) {
             // keywordConstant
             String value = jackTokenizer.keyword().value;
+            if (Keyword.THIS.is(jackTokenizer.keyword())){
+                writer.pushPointer(0);
+                jackTokenizer.advance();
+            }
             System.out.println("there is a keyword in the term :" + value);
-            jackTokenizer.advance();
         } else if (tokenType == TokenType.IDENTIFIER) {
             // varName
             String identifier = jackTokenizer.identifier();
+            String type = subroutineSymbolTable.typeOf(identifier);
+            Node caller = subroutineSymbolTable.getSymbol(identifier);
+            boolean method = false;
+            if (caller != null){
+                // not constructor
+                writer.writePushSymbol(caller);
+                method = true;
+            }
             // push xxx
-            writer.writePushSymbol(subroutineSymbolTable.getSymbol(identifier));
             jackTokenizer.advance();
             TokenType nextType = jackTokenizer.tokenType();
             if (nextType == TokenType.SYMBOL) {
@@ -504,19 +531,19 @@ public class CompilationEngine {
                 // subroutineName '(' expressionList ')'
                 // (className|varName) '.' subroutineName '(' expressionList ')'
                 if (Symbol.PERIOD.getValue() == symbol) {
-                    tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(Symbol.PERIOD.getValue()));
                     jackTokenizer.advance();
                     TokenType subIdentifier = jackTokenizer.tokenType();
                     if (subIdentifier == TokenType.IDENTIFIER) {
                         // a.b
                         String subIdentifierName = jackTokenizer.identifier();
-                        tokenXmlBuilder.addNodeAndAttribute(TokenType.IDENTIFIER.getValue(), subIdentifierName);
                         jackTokenizer.advance();
                         char symbol1 = jackTokenizer.symbol();
                         if (symbol1 == Symbol.OPEN_PAREN.getValue()) {
                             // a.b(
                             // expressionList
-                            compileExpressionList(subroutineSymbolTable);
+                            Integer argNum = compileExpressionList(subroutineSymbolTable);
+                            if (method) argNum ++;
+                            writer.writeCall(type.concat(".").concat(subIdentifierName),argNum);
                             // jackTokenizer.advance();
                             char symbol2 = jackTokenizer.symbol();
                             //a.b( expressionList )
@@ -526,15 +553,19 @@ public class CompilationEngine {
                 } else if (Symbol.OPEN_PAREN.getValue() == symbol) {
                     // a(
                     // a(expressionList
-                    compileExpressionList(subroutineSymbolTable);
+                    int argNum = compileExpressionList(subroutineSymbolTable);
+                    writer.writeCall(identifier,argNum);
                     // a(expressionList)
                     char symbol1 = jackTokenizer.symbol();
-                    tokenXmlBuilder.addNodeAndAttribute(TokenType.SYMBOL.getValue(), String.valueOf(symbol1));
+                    jackTokenizer.advance();
                 } else if (Symbol.OPEN_BRACKET.getValue() == symbol) {
                     // a[
                     // a[expression
+                    // a[b[1]]
                     jackTokenizer.advance();
                     compileExpression(subroutineSymbolTable);
+//                    writer.writePushSymbol(subroutineSymbolTable.getSymbol(identifier));
+//                    writer.writeArithmetic('+');
                     // a[expression]
                     char symbol1 = jackTokenizer.symbol();
                     jackTokenizer.advance();
@@ -559,18 +590,20 @@ public class CompilationEngine {
         }
     }
 
-    public void compileExpressionList(SymbolTable subroutineSymbolTable) throws IOException {
+    public Integer compileExpressionList(SymbolTable subroutineSymbolTable) throws IOException {
         // (expression(, expression)*)?
+        Integer argNum = 0;
         jackTokenizer.advance();
         while (Symbol.CLOSE_PAREN.getValue() != jackTokenizer.symbol()) {
             if (jackTokenizer.symbol() == Symbol.COMMA.getValue()) {
-                tokenXmlBuilder.addSymbol(jackTokenizer.symbol());
                 jackTokenizer.advance();
                 compileExpression(subroutineSymbolTable);
             } else {
                 compileExpression(subroutineSymbolTable);
             }
+            argNum++;
         }
+        return argNum;
     }
 
     private boolean isOperationSymbol(char symbol) {
