@@ -175,6 +175,12 @@ public class CompilationEngine {
         jackTokenizer.advance();
         // (
         char symbol = jackTokenizer.symbol();
+
+        if (keyword.is(Keyword.METHOD)) {
+            // 'this' is the first parameter of a method
+            subroutineSymbolTable.addSubroutineLevelSymbol("this", className, Node.KIND_ARGUMENT);
+        }
+
         Integer argNum = compileParameterList(subroutineSymbolTable);
         writer.writeFunction(className.concat(".").concat(identifier),argNum);
 
@@ -186,7 +192,6 @@ public class CompilationEngine {
         }
 
         if (keyword.is(Keyword.METHOD)) {
-            subroutineSymbolTable.addSubroutineLevelSymbol("this", className, Node.KIND_ARGUMENT);
             writer.writePush("argument",0);
             writer.popPointer(0);
         }
@@ -515,11 +520,9 @@ public class CompilationEngine {
             String identifier = jackTokenizer.identifier();
             String type = subroutineSymbolTable.typeOf(identifier);
             Node caller = subroutineSymbolTable.getSymbol(identifier);
-            boolean method = false;
             if (caller != null){
                 // not constructor
                 writer.writePushSymbol(caller);
-                method = true;
             }
             // push xxx
             jackTokenizer.advance();
@@ -542,7 +545,6 @@ public class CompilationEngine {
                             // a.b(
                             // expressionList
                             Integer argNum = compileExpressionList(subroutineSymbolTable);
-                            if (method) argNum ++;
                             writer.writeCall(type.concat(".").concat(subIdentifierName),argNum);
                             // jackTokenizer.advance();
                             char symbol2 = jackTokenizer.symbol();

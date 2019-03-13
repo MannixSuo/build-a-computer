@@ -16,13 +16,13 @@ function Point.distance 1
 push argument 0 
 pop pointer 0 
 push this 0 
-push argument 0 
-call Point.getx 1 
+push argument 1 
+call Point.getx 0 
 sub 
 pop local 0 
 push this 1 
-push argument 0 
-call Point.gety 1 
+push argument 1 
+call Point.gety 0 
 sub 
 pop local 1 
 push local 0 
