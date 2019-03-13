@@ -13,6 +13,14 @@ class Point {
      var int dx, dy;
      let dx = x - other.getx();
      let dy = y - other.gety();
+     do other.print();
+     do Point.function();
+     do print();
      return Math.sqrt((dx*dx)+ (dy*dy));
      }
+
+     method void print(){
+       return;
+     }
+     function void function(){return;}
 }

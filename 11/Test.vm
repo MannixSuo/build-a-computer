@@ -12,19 +12,26 @@ add
 pop static 0 
 push pointer 0 
 return 
-function Point.distance 1 
+function Point.distance 2 
 push argument 0 
 pop pointer 0 
 push this 0 
 push argument 1 
-call Point.getx 0 
+call Point.getx 1 
 sub 
 pop local 0 
 push this 1 
 push argument 1 
-call Point.gety 0 
+call Point.gety 1 
 sub 
 pop local 1 
+push argument 1 
+call Point.print 1 
+pop temp 0 
+call Point.function 0 
+pop temp 0 
+call Point.print 1 
+pop temp 0 
 push local 0 
 push local 0 
 call Math.multiply 2 
@@ -33,4 +40,12 @@ push local 1
 call Math.multiply 2 
 add 
 call Math.sqrt 1 
+return 
+function Point.print 1 
+push argument 0 
+pop pointer 0 
+push constant 0 
+return 
+function Point.function 0 
+push constant 0 
 return 
