@@ -1,51 +1,12 @@
-function Point.new 2 
-push constant 2 
-call  Memory.alloc 1 
-pop pointer 0 
+function Point.new 0 
 push argument 0 
-pop this 0 
-push argument 1 
-pop this 1 
-push static 0 
-push constant 1 
-add 
-pop static 0 
+push constant 0 
+eq 
+not 
+if-goto L0 
+goto L1 
+label L0 
+goto L1 
+label L1 
 push pointer 0 
-return 
-function Point.distance 2 
-push argument 0 
-pop pointer 0 
-push this 0 
-push argument 1 
-call Point.getx 1 
-sub 
-pop local 0 
-push this 1 
-push argument 1 
-call Point.gety 1 
-sub 
-pop local 1 
-push argument 1 
-call Point.print 1 
-pop temp 0 
-call Point.function 0 
-pop temp 0 
-call Point.print 1 
-pop temp 0 
-push local 0 
-push local 0 
-call Math.multiply 2 
-push local 1 
-push local 1 
-call Math.multiply 2 
-add 
-call Math.sqrt 1 
-return 
-function Point.print 1 
-push argument 0 
-pop pointer 0 
-push constant 0 
-return 
-function Point.function 0 
-push constant 0 
 return 

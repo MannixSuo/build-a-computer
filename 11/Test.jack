@@ -1,26 +1,9 @@
 class Point {
-    field int x, y;
-    static int pointCount;
+    function Point new(int ax,int ay) {
+        if(ax=0){
 
-    constructor Point new(int ax,int ay) {
-        let x = ax;
-        let y = ay;
-        let pointCount = pointCount + 1;
+        }else{
+        }
         return this;
     }
-
-    method int distance(Point other) {
-     var int dx, dy;
-     let dx = x - other.getx();
-     let dy = y - other.gety();
-     do other.print();
-     do Point.function();
-     do print();
-     return Math.sqrt((dx*dx)+ (dy*dy));
-     }
-
-     method void print(){
-       return;
-     }
-     function void function(){return;}
 }

@@ -3,23 +3,23 @@ import java.io.IOException;
 
 public class JackCompiler {
     public static void main(String[] args) throws IOException {
-        String fileName ;
+        String fileName;
         // fileName = args[0];
-        fileName =  "11/Test.jack";
+        fileName = "11/Test.jack";
         File file = new File(fileName);
-        File[] files ;
-        if (file.isDirectory()){
+        File[] files;
+        if (file.isDirectory()) {
             files = file.listFiles((dir, name) -> name.endsWith(".jack"));
-        }else {
+        } else {
             files = new File[]{file};
         }
-        if (files==null){
+        if (files == null) {
             return;
         }
-        for (File currentFile :files){
+        for (File currentFile : files) {
             JackTokenizer tokenizer = new JackTokenizer(currentFile);
-            File outputFile = new File(currentFile.getAbsolutePath().replace(".jack",".vm"));
-            CompilationEngine compilationEngine = new CompilationEngine(tokenizer,outputFile);
+            File outputFile = new File(currentFile.getAbsolutePath().replace(".jack", ".vm"));
+            CompilationEngine compilationEngine = new CompilationEngine(tokenizer, outputFile);
             compilationEngine.compile();
             compilationEngine.writeOutputFile();
             tokenizer.removeCacheFile();
