@@ -162,7 +162,7 @@ public class CompilationEngine {
         boolean voidMethod = false;
         boolean isMethod = false;
         if (keywordOrIdentifierType == TokenType.KEYWORD) {
-            if (jackTokenizer.keyword().value.equals(Keyword.VOID)){
+            if (jackTokenizer.keyword().value.equals(Keyword.VOID)) {
                 voidMethod = true;
             }
         } else if (keywordOrIdentifierType == TokenType.IDENTIFIER) {
@@ -179,7 +179,7 @@ public class CompilationEngine {
         jackTokenizer.advance();
         // (
         char symbol = jackTokenizer.symbol();
-        boolean isFunction =false;
+        boolean isFunction = false;
 
         if (keyword.is(Keyword.METHOD)) {
             functionType = FUNCTION_TYPE_METHOD;
@@ -190,28 +190,21 @@ public class CompilationEngine {
 
         Integer argNum = compileParameterList(subroutineSymbolTable);
 
-        if(keyword.is(Keyword.CONSTRUCTOR)){
+        if (keyword.is(Keyword.CONSTRUCTOR)) {
             functionType = FUNCTION_TYPE_CONSTRUCTOR;
-            int field = classLevelSymbolTable.varCount("field");
-            argNum = field;
-            writer.writePushConst(field);
-            writer.writeCall(" Memory.alloc",1);
-            writer.popPointer(0);
         }
 
-        if (keyword.is(Keyword.FUNCTION)){
+        if (keyword.is(Keyword.FUNCTION)) {
             functionType = FUNCTION_TYPE_FUNCTION;
         }
 
         if (keyword.is(Keyword.METHOD)) {
             argNum++;
-            writer.writePush("argument",0);
-            writer.popPointer(0);
         }
 
         // )
         jackTokenizer.advance();
-        compileSubroutineBody(subroutineSymbolTable,identifier,functionType);
+        compileSubroutineBody(subroutineSymbolTable, identifier, functionType);
     }
 
     public Integer compileParameterList(SymbolTable subroutineSymbolTable) throws IOException {
@@ -274,7 +267,7 @@ public class CompilationEngine {
                 if (keyword.value.equals(Keyword.VAR.value)) {
                     compileVarDec(subroutineSymbolTable);
                 } else {
-                    createFunction(subroutineSymbolTable,identifier,functionType);
+                    createFunction(subroutineSymbolTable, identifier, functionType);
                     compileStatements(subroutineSymbolTable);
                     // jackTokenizer.advance();
                 }
@@ -285,14 +278,21 @@ public class CompilationEngine {
 
     private void createFunction(SymbolTable subroutineSymbolTable, String identifier, int functionType) throws IOException {
         int argNum = 0;
-        if (FUNCTION_TYPE_CONSTRUCTOR==functionType){
-            argNum = subroutineSymbolTable.varCount("field");
-        }else if (FUNCTION_TYPE_METHOD==functionType){
-            argNum = subroutineSymbolTable.varCount("argument") + 1;
-        }else if (FUNCTION_TYPE_FUNCTION ==functionType){
+        if (FUNCTION_TYPE_CONSTRUCTOR == functionType) {
+            writer.writeFunction(className.concat(".").concat(identifier), 0);
+            argNum = subroutineSymbolTable.getPreviousTable().varCount("field");
+            writer.writePushConst(argNum);
+            writer.writeCall(" Memory.alloc", 1);
+            writer.popPointer(0);
+        } else if (FUNCTION_TYPE_METHOD == functionType) {
             argNum = subroutineSymbolTable.varCount("local");
+            writer.writeFunction(className.concat(".").concat(identifier), argNum);
+            writer.writePush("argument", 0);
+            writer.popPointer(0);
+        } else if (FUNCTION_TYPE_FUNCTION == functionType) {
+            argNum = subroutineSymbolTable.varCount("local");
+            writer.writeFunction(className.concat(".").concat(identifier), argNum);
         }
-        writer.writeFunction(className.concat(".").concat(identifier),argNum);
     }
 
     public void compileVarDec(SymbolTable subroutineSymbolTable) throws IOException {
@@ -335,7 +335,7 @@ public class CompilationEngine {
 
         // ....
         // pop varName
-
+        boolean arraryOp = false;
         // let
         jackTokenizer.advance();
         // varName
@@ -352,17 +352,27 @@ public class CompilationEngine {
             jackTokenizer.advance();
             // expression
             compileExpression(subroutineSymbolTable);
+            writer.writePushSymbol(symbol);
+            writer.writeArithmetic('+');
             // ]
             jackTokenizer.advance();
             // =
             jackTokenizer.advance();
+            arraryOp = true;
         }
         // expression
         compileExpression(subroutineSymbolTable);
-        assert Symbol.SEMICOLON.getValue()==jackTokenizer.symbol();
+        if (arraryOp) {
+            writer.writePop("temp", 0);
+            writer.writePop("pointer", 1);
+            writer.writePush("temp", 0);
+            writer.writePop("that", 0);
+        } else {
+            writer.writePopSymbol(symbol);
+        }
+        assert Symbol.SEMICOLON.getValue() == jackTokenizer.symbol();
         // ;
         // pop  kind index
-        writer.writePopSymbol(symbol);
     }
 
     public void compileIf(SymbolTable subroutineSymbolTable) throws IOException {
@@ -456,9 +466,9 @@ public class CompilationEngine {
         // classname.subroutineName(expressionList)
         boolean isClass = false;
         // varName.subroutineName(expressionList)
-        boolean isVar   = false;
+        boolean isVar = false;
         // subroutineName(expressionList)
-        boolean isSub   = false;
+        boolean isSub = false;
 
         jackTokenizer.advance();
         String subroutineName = "subroutineName";
@@ -467,30 +477,31 @@ public class CompilationEngine {
             // do a.
             jackTokenizer.advance();
             Node varNodeOrNull = subroutineSymbolTable.getSymbol(subOrClassOrVarName);
-            if (varNodeOrNull != null){
+            if (varNodeOrNull != null) {
                 isVar = true;
                 writer.writePushSymbol(varNodeOrNull);
-            }else {
+            } else {
                 isClass = true;
             }
             // do a.b
             subroutineName = jackTokenizer.identifier();
             jackTokenizer.advance();
-        }else {
+        } else {
             isSub = true;
-            writer.writePush("pointer",0);
+            writer.writePush("pointer", 0);
         }
         // do a.b( || do a(
         char symbol1 = jackTokenizer.symbol();
         // do a.b(expressionList
         int argNum = compileExpressionList(subroutineSymbolTable);
-        if (isSub||isVar) argNum++;
+        if (isSub || isVar) argNum++;
         String callName = "callName";
         if (isSub) callName = className.concat(".").concat(subOrClassOrVarName);
-        if (isClass||isVar) callName = subroutineSymbolTable.typeOf(subOrClassOrVarName).concat(".").concat(subroutineName);
+        if (isClass || isVar)
+            callName = subroutineSymbolTable.typeOf(subOrClassOrVarName).concat(".").concat(subroutineName);
 
-        writer.writeCall(callName,argNum);
-        writer.writePop("temp",0);
+        writer.writeCall(callName, argNum);
+        writer.writePop("temp", 0);
         // do a.b(expressionList)
         char symbol2 = jackTokenizer.symbol();
         jackTokenizer.advance();
@@ -503,7 +514,7 @@ public class CompilationEngine {
         System.out.println("compile return statements");
         jackTokenizer.advance();
         char symbol = jackTokenizer.symbol();
-        if (jackTokenizer.symbol() == Symbol.SEMICOLON.getValue()){
+        if (jackTokenizer.symbol() == Symbol.SEMICOLON.getValue()) {
             writer.writePushConst(0);
         }
         while (jackTokenizer.symbol() != Symbol.SEMICOLON.getValue()) {
@@ -529,16 +540,16 @@ public class CompilationEngine {
             jackTokenizer.advance();
             // term
             compileTerm(subroutineSymbolTable);
-            if (isArithmetic(op)){
+            if (isArithmetic(op)) {
                 writer.writeArithmetic(op);
-            }else {
+            } else {
                 writer.writeLogic(op);
             }
         }
     }
 
     private boolean isArithmetic(char op) {
-        return '+'==op||'-'==op||'*'==op||'/'==op;
+        return '+' == op || '-' == op || '*' == op || '/' == op;
     }
 
     public void compileTerm(SymbolTable subroutineSymbolTable) throws IOException {
@@ -556,30 +567,26 @@ public class CompilationEngine {
             String stringVal = jackTokenizer.stringVal();
             int length = stringVal.length();
             writer.writePushConst(length);
-            writer.writeCall("String.new",1);
-            writer.popPointer(0);
-
-            for (char c:stringVal.toCharArray()){
-                writer.pushPointer(0);
+            writer.writeCall("String.new", 1);
+            for (char c : stringVal.toCharArray()) {
                 writer.writePushConst(c);
-                writer.writeCall("String.appendChar",1);
-                writer.popPointer(0);
+                writer.writeCall("String.appendChar", 2);
             }
             jackTokenizer.advance();
         } else if (tokenType == TokenType.KEYWORD) {
             // keywordConstant
             String value = jackTokenizer.keyword().value;
-            if (Keyword.THIS.is(jackTokenizer.keyword())){
+            if (Keyword.THIS.is(jackTokenizer.keyword())) {
                 writer.pushPointer(0);
                 jackTokenizer.advance();
-            }else if (Keyword.TRUE.is(jackTokenizer.keyword())){
+            } else if (Keyword.TRUE.is(jackTokenizer.keyword())) {
                 writer.writePushConst(0);
                 writer.writeLogic('~');
                 jackTokenizer.advance();
-            }else if (Keyword.FALSE.is(jackTokenizer.keyword())){
+            } else if (Keyword.FALSE.is(jackTokenizer.keyword())) {
                 writer.writePushConst(0);
                 jackTokenizer.advance();
-            }else if (Keyword.NULL.is(jackTokenizer.keyword())){
+            } else if (Keyword.NULL.is(jackTokenizer.keyword())) {
                 writer.writePushConst(0);
                 jackTokenizer.advance();
             }
@@ -589,11 +596,6 @@ public class CompilationEngine {
             String type = subroutineSymbolTable.typeOf(identifier);
             Node caller = subroutineSymbolTable.getSymbol(identifier);
             boolean isMethod = false;
-            if (caller != null){
-                // not constructor
-                writer.writePushSymbol(caller);
-                isMethod = true;
-            }
             // push xxx
             jackTokenizer.advance();
             TokenType nextType = jackTokenizer.tokenType();
@@ -605,6 +607,11 @@ public class CompilationEngine {
                 // (className|varName) '.' subroutineName '(' expressionList ')'
                 if (Symbol.PERIOD.getValue() == symbol) {
                     jackTokenizer.advance();
+                    if (caller != null) {
+                        // not constructor
+                        writer.writePushSymbol(caller);
+                        isMethod = true;
+                    }
                     TokenType subIdentifier = jackTokenizer.tokenType();
                     if (subIdentifier == TokenType.IDENTIFIER) {
                         // a.b
@@ -615,8 +622,8 @@ public class CompilationEngine {
                             // a.b(
                             // expressionList
                             Integer argNum = compileExpressionList(subroutineSymbolTable);
-                            if (isMethod) argNum ++;
-                            writer.writeCall(type.concat(".").concat(subIdentifierName),argNum);
+                            if (isMethod) argNum++;
+                            writer.writeCall(type.concat(".").concat(subIdentifierName), argNum);
                             // jackTokenizer.advance();
                             char symbol2 = jackTokenizer.symbol();
                             //a.b( expressionList )
@@ -627,7 +634,7 @@ public class CompilationEngine {
                     // a(
                     // a(expressionList
                     int argNum = compileExpressionList(subroutineSymbolTable);
-                    writer.writeCall(identifier,argNum);
+                    writer.writeCall(identifier, argNum);
                     // a(expressionList)
                     char symbol1 = jackTokenizer.symbol();
                     jackTokenizer.advance();
@@ -637,11 +644,15 @@ public class CompilationEngine {
                     // a[b[1]]
                     jackTokenizer.advance();
                     compileExpression(subroutineSymbolTable);
-                    writer.writePushSymbol(subroutineSymbolTable.getSymbol(identifier));
+                    writer.writePushSymbol(caller);
                     writer.writeArithmetic('+');
+                    writer.writePop("pointer", 1);
+                    writer.writePush("that", 0);
                     // a[expression]
                     char symbol1 = jackTokenizer.symbol();
                     jackTokenizer.advance();
+                }else {
+                    writer.writePushSymbol(caller);
                 }
             }
         } else if (tokenType == TokenType.SYMBOL) {
@@ -688,7 +699,8 @@ public class CompilationEngine {
                 || symbol == Symbol.VERTICAL_BAR.getValue() || symbol == Symbol.TILDE.getValue()
                 || symbol == Symbol.AND.getValue() || symbol == Symbol.EQUAL.getValue();
     }
-    public int generateLabel(){
+
+    public int generateLabel() {
         return labelNumber++;
     }
 }

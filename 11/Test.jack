@@ -1,9 +1,0 @@
-class Point {
-    function Point new(int ax,int ay) {
-        if(ax=0){
-
-        }else{
-        }
-        return this;
-    }
-}

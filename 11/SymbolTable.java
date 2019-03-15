@@ -24,7 +24,9 @@ public class SymbolTable {
     public static SymbolTable createClassLevelTable() {
         return new SymbolTable();
     }
-
+    public SymbolTable getPreviousTable(){
+        return previousTable;
+    }
 
     public void addClassLevelSymbol(String name, String type, String kind) {
         Node node = new Node(name, type, kind, varCount(kind), CLASS_LEVEL);

@@ -4,8 +4,7 @@ import java.io.IOException;
 public class JackCompiler {
     public static void main(String[] args) throws IOException {
         String fileName;
-        // fileName = args[0];
-        fileName = "11/Test.jack";
+        fileName = args[0];
         File file = new File(fileName);
         File[] files;
         if (file.isDirectory()) {
