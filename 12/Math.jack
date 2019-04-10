@@ -11,6 +11,7 @@ class Math {
 
     static Array twoToThe;
     static int MAX_BYTE_LENGTH = 16;
+
     /** Initializes the library. */
     function void init() {
         do initTwoToArray();
@@ -55,12 +56,13 @@ class Math {
      */
     function int divide(int x, int y) {
        var int q;
-       if(y > x)
+       var int sign;
+       if( y > x || y < 0)
        {
             return 0;
        }
        let q = divide(x,y+y);
-       if ((x - multiply(multiply(2,q),y))<y)
+       if ((x - multiply( q + q , y))<y)
        {
             return multiply(2,q);
        }
@@ -72,14 +74,18 @@ class Math {
 
     /** Returns the integer part of the square root of x. */
     function int sqrt(int x) {
-        var int y,j;
+        var int y,j,n;
         let y = 0 ;
         let j = 0 ;
-        while(j < divide(x,2)-1)
+        let n = getN(x);
+        while( j < divide(n,2) - 1 )
         {
-
+            if(multiply(y + twoToThe[j],y + twoToThe[j]) <= x && multiply(y + twoToThe[j],y + twoToThe[j]) > 0)
+            {
+                y = y + twoToThe[j];
+            }
         }
-
+        return y;
     }
 
     /** Returns the greater number. */
@@ -136,6 +142,19 @@ class Math {
         {
             let twoToThe[i] = v;
             let v = v + v;
+            let i = i + 1;
+        }
+    }
+
+    /** return the minimum n which 2^n > x*/
+    function int getN(int x)
+    {
+        var int i = 0 ;
+        while( i < MAX_BYTE_LENGTH)
+        {
+            if(twoToThe[i] >= x){
+                return i;
+            }
             let i = i + 1;
         }
     }
