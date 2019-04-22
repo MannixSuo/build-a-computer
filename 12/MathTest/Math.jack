@@ -1,0 +1,202 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Math.jack
+
+/**
+ * A library of commonly used mathematical functions.
+ * Note: Jack compilers implement multiplication and division using OS method calls.
+ */
+class Math {
+
+    static Array twoToThe;
+
+    /** Initializes the library. */
+    function void init() {
+        do Math.initTwoToArray();
+        return;
+    }
+
+    /** Returns the absolute value of x. */
+    function int abs(int x) {
+        if(x < 0)
+        {
+            return -x;
+        }
+        else
+        {
+            return x;
+        }
+    }
+
+    /** Returns the product of x and y. 
+     *  When a Jack compiler detects the multiplication operator '*' in the 
+     *  program's code, it handles it by invoking this method. In other words,
+     *  the Jack expressions x*y and multiply(x,y) return the same value.
+     */
+    function int multiply(int x, int y) {
+        var int sum;
+        var int shiftedX ;
+        var int i;
+        let sum = 0;
+        let shiftedX = x;
+        let i = 0;
+        while(i < 16)
+        {
+            if( Math.bit(y,i) )
+            {
+                let sum = sum + shiftedX;
+            }
+            let shiftedX = shiftedX + shiftedX;
+            let i = i + 1;
+        }
+        return sum;
+    }
+
+    /** Returns the integer part of x/y.
+     *  When a Jack compiler detects the multiplication operator '/' in the 
+     *  program's code, it handles it by invoking this method. In other words,
+     *  the Jack expressions x/y and divide(x,y) return the same value.
+     */
+    function int divide(int x, int y) {
+       var int q;
+       var boolean neg;
+       var int result;
+       if (x < 0)
+       {
+            let neg = true;
+       }
+       else
+       {
+           let neg = false;
+       }
+       let x = Math.abs(x);
+       if( y > x | y < 0)
+       {
+            return 0;
+       }
+       let q = Math.divide(x,y+y);
+       if ((x - Math.multiply( q + q , y))<y)
+       {
+            let result = Math.multiply(2,q);
+       }
+       else
+       {
+            let result = Math.multiply(2,q) + 1;
+       }
+       if(neg)
+       {
+            return -result;
+       }
+       else
+       {
+         return result;
+       }
+    }
+
+    /** Returns the integer part of the square root of x. */
+    function int sqrt(int x) {
+        var int y,j,n,k;
+        let y = 0 ;
+        let n = Math.getN(x);
+        let j = Math.divide(n,2);
+        // do Output.printInt(n);
+        // 9 < 2^4
+        // 32767 < 2 ^ 15  < 181
+        while(~(j < 0))
+        {
+            let k = y + twoToThe[j];
+            if( ~(Math.multiply(k,k) > x))
+            {
+                if(Math.multiply(k,k) > 0)
+                {
+                   do Output.printInt(k);
+                   do Output.println();
+                   do Output.printInt(x);
+                   do Output.println();
+                   let  y = k;
+                }
+            }
+            let j = j - 1;
+        }
+        return y;
+    }
+
+    /** Returns the greater number. */
+    function int max(int a, int b) {
+        if(a > b)
+        {
+            return a;
+        }
+        else
+        {
+            return b;
+        }
+    }
+
+    /** Returns the smaller number. */
+    function int min(int a, int b) {
+        if(a > b)
+        {
+            return b;
+        }
+        else
+        {
+            return a;
+        }
+    }
+
+    /** Return i-th bit of x if 1 return true */
+    function boolean bit(int x , int i){
+        var boolean result;
+        var int n ;
+        let result = false;
+        let n = 15;
+        while( ~((n - i ) < 0) )
+        {
+            if( ~((x - twoToThe[n]) < 0) )
+            {
+                let x = x - twoToThe[n];
+                let result = true;
+            }
+            else
+            {
+                let result = false;
+            }
+            let n = n -1;
+        }
+        return result;
+    }
+
+    /** initialize the twoToThe array let twoToThe[i] = 2^i */
+    function void initTwoToArray()
+    {
+        var int i ;
+        var int v ;
+        let i = 0;
+        let v = 1;
+        let twoToThe = Array.new(15);
+        while(i < 16)
+        {
+            let twoToThe[i] = v;
+            let v = v + v;
+            let i = i + 1;
+        }
+        return;
+    }
+
+    /** return the minimum n which 2^n > x*/
+    function int getN(int x)
+    {
+        var int i ;
+        let i = 0;
+        while( i < 15)
+        {
+            if( ~((twoToThe[i] - x) < 0) ){
+                return i;
+            }
+            let i = i + 1;
+        }
+        return i;
+    }
+}
