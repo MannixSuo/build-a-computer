@@ -12,7 +12,7 @@ class Memory {
 
     static Array ram;
     static Array heap,freeList;
-    static int reserveMemorySpace;
+
     /** Initializes the class. */
     function void init() {
         let ram = 0;
@@ -20,7 +20,6 @@ class Memory {
         let freeList = heap;
         let heap[0] = 0;  // next
         let heap[1] = 14334; // length
-        let reserveMemorySpace = 2;
         return;
     }
 
@@ -37,38 +36,49 @@ class Memory {
 
     /** Finds an available RAM block of the given size and returns
      *  a reference to its base address. */
-    function int alloc(int size) {
-        var int allocatedMemorySegmentAddress;
-        var int previousFreeMemorySegmentAddress;
-        var int nextFreeMemorySegmentAddress;
-        var int remainderMemorySegmentAddress;
-
-        let allocatedMemorySegmentAddress = freeList[0];
-        let nextFreeMemorySegmentAddress = freeList[0];
-        let previousFreeMemorySegmentAddress = freeList[0];
-
-
-        // block[0] != 0
-        while( ~(Memory.peek(allocatedMemorySegmentAddress) = 0))
+    function int alloc(int size) 
+    {
+        var int returnBlock;
+        var int currentBlock ;
+        var int fit ;
+        let fit = 0 ;
+        let currentBlock = freeList;
+        // currentBlock[0] != 0 || currentBlock[1] > szie + 2
+        while(fit = 0)
         {
-            // block[1] >= size+2
-            if(~ (block[1] < (size+2) ))
+            // currentBlock[1] > size + 2
+            if(Memory.peek(currentBlock + 1) > size + 2)
             {
-                let freeList =
+                let fit = 1;
             }
             else
             {
-                let block = block[0];
+                // currentBlock = currentBlock[0];
+                let currentBlock = Memory.peek(currentBlock);
+                if(Memory.peek(currentBlock) = 0)
+                {
+                    // fit != 1 and next node is 0 not find
+                    if(~(fit = 1))
+                    {
+                        let fit = 2;
+                    }
+                }
             }
+            
         }
-        let remainderMemorySegmentAddress = allocatedMemorySegmentAddress + size;
-        // make allocated memory segment has a size
-        do Memory.poke(allocatedMemorySegmentAddress + 1, size );
-
-        do Memory.poke(previousFreeMemorySegmentAddress,allocatedMemorySegmentAddress);
-        let
-
-       return 1;
+        if(fit = 1)
+        {
+            let returnBlock = Memory.peek(currentBlock + 1) - size + currentBlock;
+            // let returnBlock[1] = size;
+            do Memory.poke(returnBlock,size);
+            // let currentBlock[1] = currentBlock[1] - size - 2;
+            do Memory.poke(returnBlock+1,Memory.peek(currentBlock + 1)-size -2);
+            return returnBlock;
+        }
+        else
+        {
+            return 0;
+        }
     }
 
     /** De-allocates the given object (cast as an array) by making
