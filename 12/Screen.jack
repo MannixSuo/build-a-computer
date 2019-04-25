@@ -10,9 +10,17 @@
  * the screen is indexed (0,0).
  */
 class Screen {
-
+    field boolean color;
+    field int memoriesEachYLine;
+    field int pixelsEachMemory;
+    field int baseScreenMapAddress;
     /** Initializes the Screen. */
     function void init() {
+        let color = true;
+        let memoriesEachYLine = 32;
+        let pixelsEachMemory = 16;
+        let baseScreenMapAddress = 16384;
+        return;
     }
 
     /** Erases the entire screen. */
@@ -22,10 +30,47 @@ class Screen {
     /** Sets the current color, to be used for all subsequent drawXXX commands.
      *  Black is represented by true, white by false. */
     function void setColor(boolean b) {
+        let color = b;
+        return;
     }
 
     /** Draws the (x,y) pixel, using the current color. */
     function void drawPixel(int x, int y) {
+        var int address ,value;
+        let address = Screen.getPixelMemoryAddress(x,y);
+        
+        let value = Memory.peek(baseScreenMapAddress + address);
+        if(color){
+            let value = value + Screen.pow(2,Screen.xDivideYremainder(value,16));
+        }else{
+            let value = value - Screen.pow(2,Screen.xDivideYremainder(value,16));
+        }
+        do Memory.poke(address,value);
+        return;
+    }
+
+    /** Return the memoryAdress which the pixel belong to
+     *  memoryAdress = 32 * y + x / 16 */
+    function int getPixelMemoryAddress(int x,int y){
+        return memoriesEachYLine * y + Math.divide(x,pixelsEachMemory) 
+    }
+
+    /** return x % y*/
+    function int xDivideYremainder(int x,int y){
+        return x - Math.divide(x,y);
+    }
+    /**return x^y */
+    function int pow(int x , int y){
+        if(x = 0){
+            return 0;
+        }
+        var int sum;
+        let sum = 1;
+        while(y > 1){
+            let sum = Math.multiply(sum,x);
+            let y = y - 1;
+        }
+        return sum;
     }
 
     /** Draws a line from pixel (x1,y1) to pixel (x2,y2), using the current color. */
