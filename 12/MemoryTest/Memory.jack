@@ -84,6 +84,8 @@ class Memory {
     /** De-allocates the given object (cast as an array) by making
      *  it available for future allocations. */
     function void deAlloc(Array o) {
-       return;
+        do Memory.poke(o , freeList);
+        let freeList = o;
+        return;
     }    
 }
