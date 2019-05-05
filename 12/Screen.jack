@@ -75,14 +75,41 @@ class Screen {
 
     /** Draws a line from pixel (x1,y1) to pixel (x2,y2), using the current color. */
     function void drawLine(int x1, int y1, int x2, int y2) {
+        var int dx , dy;
+        let dx = x2 - x1;
+        let dy = y2 - y1;
+        var int x,y,diff;
+        let x = x1;
+        let y = y1;
+        // while x<=dx and y<=dy
+        while((~(x>dx))&(~(y>dy))){
+            let diff = x*dy - y*dx;
+            drawPixel(x,y);
+            if(diff<0){
+                x = x + 1;
+            }else{
+                y = y + 1;
+            }
+        }
+        return;
     }
 
     /** Draws a filled rectangle whose top left corner is (x1, y1)
      * and bottom right corner is (x2,y2), using the current color. */
     function void drawRectangle(int x1, int y1, int x2, int y2) {
+        drawLine(x1,y1,x1,y2);
+        drawLine(x1,y1,x2,y1);
+        drawLine(x1,y2,x2,y2);
+        drawLine(x2,y1,x2,y2);
     }
 
     /** Draws a filled circle of radius r<=181 around (x,y), using the current color. */
     function void drawCircle(int x, int y, int r) {
+        var int rc;
+        let rc = -r;
+        while(~(rc > r)){
+            drawLine(x - Math.squre((r * r )- (rc * rc)),y+rc,x + Math.squre((r * r )- (rc * rc)),y+rc)
+        }
+        return;
     }
 }
