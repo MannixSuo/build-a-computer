@@ -23,8 +23,11 @@ class Output {
 
     /** Initializes the screen, and locates the cursor at the screen's top-left. */
     function void init() {
+        do Output.initMap();
         let cursorColumn = 0;
         let cursorRow = 0;
+        do Output.printChar(0);
+        return;
     }
 
     // Initializes the character map array
@@ -180,55 +183,54 @@ class Output {
     /** Moves the cursor to the j-th column of the i-th row,
      *  and erases the character displayed there. */
     function void moveCursor(int i, int j) {
+        var int memAddress;
+        if(j>64)
+        {
+            let i = i + 1;
+            let j = 0;
+        }
+        if(i>23)
+        {
+            let i = 0;
+            let j = 0;
+        }
         let cursorRow = i;
         let cursorColumn = j;
+        let memAddress = 16384 + Math.multiply(32,cursorRow) + Math.divide(Math.multiply(cursorColumn,8),16);
+        do Output.printMap(0,memAddress);
         return;
     }
 
     /** Displays the given character at the cursor location,
      *  and advances the cursor one column forward. */
     function void printChar(char c) {
-        var Array cMap;
-        var int rows,memAddress,oriChar;
-        let rows = 0;
-        let cMap = Output.getMap(c);
+        var int memAddress;
         let memAddress = 16384 + Math.multiply(32,cursorRow) + Math.divide(Math.multiply(cursorColumn,8),16);
-        if(Output.currentCursorIsOdd)
-        {
-            while(rows<11){
-                do Memory.poke(memAddress,cMap[rows]);
-                let memAddress = memAddress + 32;
-                let rows = rows + 1;
-            }
-        }
-        else
-        {
-            while(rows<11){
-                let oriChar = Memory.peek(memAddress);
-                let oriChar = (oriChar&255);
-                do Memory.poke(memAddress,oriChar + Math.multiply(cMap[rows],256));
-                let memAddress = memAddress + 32;
-                let rows = rows + 1;
-            }
-        }
+        do Output.printMap(c,memAddress);
+        do Output.moveCursor(cursorRow,cursorColumn + 1);
+        return;
     }
 
     /** displays the given string starting at the cursor location,
      *  and advances the cursor appropriately. */
     function void printString(String s) {
+        return;
     }
 
     /** Displays the given integer starting at the cursor location,
      *  and advances the cursor appropriately. */
     function void printInt(int i) {
+        return;
     }
 
     /** Advances the cursor to the beginning of the next line. */
     function void println() {
+        return;
     }
 
     /** Moves the cursor one column back. */
     function void backSpace() {
+        return;
     }
 
     function boolean currentCursorIsOdd(){
@@ -243,5 +245,34 @@ class Output {
         {
             return true;
         }
+    }
+
+    function void printMap(char c,int memAddress)
+    {
+        var Array cMap;
+        var int rows,oriChar;
+        let cMap = Output.getMap(c);
+        if(Output.currentCursorIsOdd())
+        {
+            while(rows<11)
+            {
+                let oriChar = Memory.peek(memAddress);
+                let oriChar = (oriChar&255);
+                let oriChar = oriChar + Math.multiply(cMap[rows],256);
+                do Memory.poke(memAddress,oriChar);
+                let memAddress = memAddress + 32;
+                let rows = rows + 1;
+            }
+        }
+        else
+        {
+            while(rows<11)
+            {
+                do Memory.poke(memAddress,cMap[rows]);
+                let memAddress = memAddress + 32;
+                let rows = rows + 1;
+            }
+        }
+        return;
     }
 }
