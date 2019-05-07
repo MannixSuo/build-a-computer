@@ -26,7 +26,7 @@ class Output {
         do Output.initMap();
         let cursorColumn = 0;
         let cursorRow = 0;
-        do Output.printChar(0);
+        do Output.printMap(32,16384);
         return;
     }
 
@@ -184,20 +184,20 @@ class Output {
      *  and erases the character displayed there. */
     function void moveCursor(int i, int j) {
         var int memAddress;
-        if(j>64)
+        if(j>63)
         {
             let i = i + 1;
             let j = 0;
         }
-        if(i>23)
+        if(i>22)
         {
             let i = 0;
             let j = 0;
         }
         let cursorRow = i;
         let cursorColumn = j;
-        let memAddress = 16384 + Math.multiply(32,cursorRow) + Math.divide(Math.multiply(cursorColumn,8),16);
-        do Output.printMap(0,memAddress);
+        let memAddress = 16384 + Math.multiply(352,cursorRow) + Math.divide(Math.multiply(cursorColumn,8),16);
+        do Output.printMap(32,memAddress);
         return;
     }
 
@@ -205,7 +205,7 @@ class Output {
      *  and advances the cursor one column forward. */
     function void printChar(char c) {
         var int memAddress;
-        let memAddress = 16384 + Math.multiply(32,cursorRow) + Math.divide(Math.multiply(cursorColumn,8),16);
+        let memAddress = 16384 + Math.multiply(352,cursorRow) + Math.divide(Math.multiply(cursorColumn,8),16);
         do Output.printMap(c,memAddress);
         do Output.moveCursor(cursorRow,cursorColumn + 1);
         return;
@@ -214,22 +214,60 @@ class Output {
     /** displays the given string starting at the cursor location,
      *  and advances the cursor appropriately. */
     function void printString(String s) {
+        var int length,index;
+        var char c;
+        let length = s.length();
+        let index = 0;
+        while(index < length){
+            let c = s.charAt(index);
+            do Output.printChar(c);
+            let index = index + 1;
+        }
         return;
     }
 
     /** Displays the given integer starting at the cursor location,
      *  and advances the cursor appropriately. */
     function void printInt(int i) {
+        var int remain,index;
+        var Array stack;
+        var boolean neg;
+        let stack = Array.new(6);
+        let index = 0;
+        let neg = false;
+        if(i<0)
+        {
+            let neg = true;
+            let i = -i;
+        }
+        while(i > 0)
+        {
+            let stack[index] = Output.xDivYremain(i,10);
+            let index = index + 1;
+            let i = Math.divide(i,10);
+        }
+        let index = index - 1;
+        if(neg)
+        {
+            do Output.printChar(45);
+        }
+        while(~(index<0))
+        {
+            do Output.printChar(stack[index] + 48);
+            let index = index - 1;
+        }
         return;
     }
 
     /** Advances the cursor to the beginning of the next line. */
     function void println() {
+        do Output.moveCursor(cursorRow + 1,0);
         return;
     }
 
     /** Moves the cursor one column back. */
     function void backSpace() {
+        do Output.moveCursor(cursorRow,cursorColumn - 1);
         return;
     }
 
@@ -274,5 +312,22 @@ class Output {
             }
         }
         return;
+    }
+
+    function int xDivYremain(int x,int y)
+    {
+        if(x < y)
+        {
+            return x;
+        }
+        if(x = y){
+            return 0;
+        }
+        return x - Math.multiply(Math.divide(x,y),y);
+    }
+
+    function int currentCursorMemAddress()
+    {
+        return 0;
     }
 }

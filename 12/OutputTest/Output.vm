@@ -5,8 +5,9 @@ push constant 0
 pop static 1
 push constant 0
 pop static 2
-push constant 0
-call Output.printChar 1
+push constant 32
+push constant 16384
+call Output.printMap 2
 pop temp 0
 push constant 0
 return
@@ -1484,7 +1485,7 @@ push that 0
 return
 function Output.moveCursor 1
 push argument 1
-push constant 64
+push constant 63
 gt
 if-goto IF_TRUE0
 goto IF_FALSE0
@@ -1497,7 +1498,7 @@ push constant 0
 pop argument 1
 label IF_FALSE0
 push argument 0
-push constant 23
+push constant 22
 gt
 if-goto IF_TRUE1
 goto IF_FALSE1
@@ -1512,7 +1513,7 @@ pop static 2
 push argument 1
 pop static 1
 push constant 16384
-push constant 32
+push constant 352
 push static 2
 call Math.multiply 2
 add
@@ -1523,7 +1524,7 @@ push constant 16
 call Math.divide 2
 add
 pop local 0
-push constant 0
+push constant 32
 push local 0
 call Output.printMap 2
 pop temp 0
@@ -1531,7 +1532,7 @@ push constant 0
 return
 function Output.printChar 1
 push constant 16384
-push constant 32
+push constant 352
 push static 2
 call Math.multiply 2
 add
@@ -1554,16 +1555,132 @@ call Output.moveCursor 2
 pop temp 0
 push constant 0
 return
-function Output.printString 0
+function Output.printString 3
+push argument 0
+call String.length 1
+pop local 0
+push constant 0
+pop local 1
+label WHILE_EXP0
+push local 1
+push local 0
+lt
+not
+if-goto WHILE_END0
+push argument 0
+push local 1
+call String.charAt 2
+pop local 2
+push local 2
+call Output.printChar 1
+pop temp 0
+push local 1
+push constant 1
+add
+pop local 1
+goto WHILE_EXP0
+label WHILE_END0
 push constant 0
 return
-function Output.printInt 0
+function Output.printInt 4
+push constant 6
+call Array.new 1
+pop local 2
+push constant 0
+pop local 1
+push constant 0
+pop local 3
+push argument 0
+push constant 0
+lt
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push constant 0
+not
+pop local 3
+push argument 0
+neg
+pop argument 0
+label IF_FALSE0
+label WHILE_EXP0
+push argument 0
+push constant 0
+gt
+not
+if-goto WHILE_END0
+push local 1
+push local 2
+add
+push argument 0
+push constant 10
+call Output.xDivYremain 2
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push local 1
+push constant 1
+add
+pop local 1
+push argument 0
+push constant 10
+call Math.divide 2
+pop argument 0
+goto WHILE_EXP0
+label WHILE_END0
+push local 1
+push constant 1
+sub
+pop local 1
+push local 3
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push constant 45
+call Output.printChar 1
+pop temp 0
+label IF_FALSE1
+label WHILE_EXP1
+push local 1
+push constant 0
+lt
+not
+not
+if-goto WHILE_END1
+push local 1
+push local 2
+add
+pop pointer 1
+push that 0
+push constant 48
+add
+call Output.printChar 1
+pop temp 0
+push local 1
+push constant 1
+sub
+pop local 1
+goto WHILE_EXP1
+label WHILE_END1
 push constant 0
 return
 function Output.println 0
+push static 2
+push constant 1
+add
+push constant 0
+call Output.moveCursor 2
+pop temp 0
 push constant 0
 return
 function Output.backSpace 0
+push static 2
+push static 1
+push constant 1
+sub
+call Output.moveCursor 2
+pop temp 0
 push constant 0
 return
 function Output.currentCursorIsOdd 2
@@ -1663,5 +1780,35 @@ pop local 1
 goto WHILE_EXP1
 label WHILE_END1
 label IF_END0
+push constant 0
+return
+function Output.xDivYremain 0
+push argument 0
+push argument 1
+lt
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push argument 0
+return
+label IF_FALSE0
+push argument 0
+push argument 1
+eq
+if-goto IF_TRUE1
+goto IF_FALSE1
+label IF_TRUE1
+push constant 0
+return
+label IF_FALSE1
+push argument 0
+push argument 0
+push argument 1
+call Math.divide 2
+push argument 1
+call Math.multiply 2
+sub
+return
+function Output.currentCursorMemAddress 0
 push constant 0
 return
