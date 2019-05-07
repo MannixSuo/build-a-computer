@@ -35,7 +35,17 @@ class Keyboard {
      * F1 - F12 = 141 - 152
      */
     function char keyPressed() {
-        return Memory.peek(keyboardMemAddress);
+        var int val;
+        let val = Memory.peek(keyboardMemAddress);
+        if(val=0)
+        {
+            return 0;
+        }
+        else
+        {   
+            do Memory.poke(keyboardMemAddress,0);
+            return val;
+        }
     }
 
     /**								
@@ -64,6 +74,7 @@ class Keyboard {
         var String result;
         let key = 0;
         let result = String.new(50);
+        do Output.printString(message);
         while(~(key = 128))
         {
             let key = Keyboard.keyPressed();
@@ -75,9 +86,10 @@ class Keyboard {
             if(key=129)
             {
                 do result.eraseLastChar();
-                do Output.backSpace();
+                do result.eraseLastChar();
             }
         }
+        do Output.println();
         return result;
     }   
 
@@ -88,6 +100,42 @@ class Keyboard {
      * entered text is detected). Also handles user backspaces. 
      */
     function int readInt(String message) {
-        return 1;
+        var int val,keyVal,key;
+        var boolean neg;
+        do Output.printString(message);
+        let val = 0;
+        let key = 0;
+        while(~(key = 128))
+        {
+            let key = Keyboard.keyPressed();
+            if(key = 45)
+            {
+                let neg = true;
+                do Output.printChar(key);
+            }
+            if(key > 47)
+            {
+                if(key < 58)
+                {
+                    do Output.printChar(key);
+                    let keyVal = key - 48;
+                    let val = keyVal + Math.multiply(val,10);
+                }
+            }
+            if(key = 129)
+            {
+                do Output.backSpace();
+                let val = Math.divide(val,10);
+            }
+        }
+        do Output.println();
+        if(neg)
+        {
+            return -val;
+        }
+        else
+        {
+            return val;
+        }
     }
 }
